@@ -6,7 +6,7 @@ use App\Models\Brand;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Shoe;
-use App\Models\SKU;
+use App\Models\ShoeVariations;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -56,19 +56,19 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $airMaxBlue = SKU::create([
+        $airMaxBlue = ShoeVariations::create([
             'shoe_id' => $airMax->id,
             'attributes' => ['size' => 42, 'color' => 'Blue'],
             'stock_quantity' => 12,
         ]);
 
-        SKU::create([
+        ShoeVariations::create([
             'shoe_id' => $airMax->id,
             'attributes' => ['size' => 43, 'color' => 'Black'],
             'stock_quantity' => 8,
         ]);
 
-        SKU::create([
+        ShoeVariations::create([
             'shoe_id' => $ultraboost->id,
             'attributes' => ['size' => 41, 'color' => 'White'],
             'stock_quantity' => 15,
