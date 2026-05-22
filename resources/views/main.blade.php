@@ -52,7 +52,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <!-- Product Card 1 -->
-            <a href="{{ url('/product/1') }}" class="group flex flex-col h-full text-left">
+            <a href="{{ url('/product') }}" class="group flex flex-col h-full text-left">
                 <div class="relative aspect-square overflow-hidden bg-slate-100 rounded-3xl mb-4">
                     <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Aero Glide Pro" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out" />
                     <button class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-slate-400 hover:text-red-500 hover:scale-110 transition-all z-10" onclick="event.preventDefault()">

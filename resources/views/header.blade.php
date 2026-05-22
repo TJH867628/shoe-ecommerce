@@ -12,7 +12,7 @@
         <!-- Desktop Links -->
         <div class="hidden md:flex items-center gap-8">
             <a href="{{ url('/') }}" class="text-sm font-bold {{ request()->is('/') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">Home</a>
-            <a href="{{ url('/shop') }}" class="text-sm font-bold {{ request()->is('shop*') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">Shop</a>
+            <a href="{{ url('/product') }}" class="text-sm font-bold {{ request()->is('product*') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">Product</a>
             <a href="{{ url('/collections') }}" class="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors">Collections</a>
             <a href="{{ url('/about') }}" class="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors">About</a>
         </div>
@@ -40,7 +40,7 @@
     <!-- Mobile Dropdown -->
     <div id="mobileMenu" class="hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 py-4 px-6 shadow-xl flex-col gap-4">
         <a href="{{ url('/') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Home</a>
-        <a href="{{ url('/shop') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Shop</a>
+        <a href="{{ url('/product') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Product</a>
         <a href="{{ url('/collections') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Collections</a>
         <a href="{{ url('/about') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">About</a>
     </div>

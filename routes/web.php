@@ -5,6 +5,7 @@ use App\Http\Controllers\ShoeController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\UserController;
+use App\Models\Shoe;
 /*
 GET
 */
@@ -13,6 +14,7 @@ Route::get('/', function () {
 });
 Route::get('register',[UserController::class, 'registerPage']) -> name('register');
 Route::get('login',[UserController::class, 'loginPage']) -> name('login');
+Route::get('product', [ShoeController::class, 'index'])->name('product');
 Route::get('/brands', [BrandController::class, 'getAllBrands']);
 Route::get('/shoes', [ShoeController::class, 'getAllShoes']);
 Route::get('/products/{shoeId}', [ShoeController::class, 'show'])->name('products.show');

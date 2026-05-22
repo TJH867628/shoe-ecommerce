@@ -16,6 +16,11 @@ use Exception;
 
 class ShoeController extends Controller
 {
+    public function index()
+    {
+        return view('product');
+    }
+
     public function show(int $shoeId)
     {
         $shoe = Shoe::with([
