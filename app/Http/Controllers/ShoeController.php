@@ -18,7 +18,46 @@ class ShoeController extends Controller
 {
     public function index()
     {
-        return view('product');
+        return view('user.product');
+    }
+
+    public function wishlist()
+    {
+        //fake data for wishlist page
+        $wishlistItems = collect([
+            (object) [
+                'id' => 1,
+                'product' => (object) [
+                    'id' => 1,
+                    'name' => 'Air Max Pro',
+                    'category' => 'Running',
+                    'price' => 129.99,
+                    'image_url' => 'https://images.unsplash.com/photo-1528701800489-47645c2a34f2?auto=format&fit=crop&w=900&q=80',
+                ],
+            ],
+            (object) [
+                'id' => 2,
+                'product' => (object) [
+                    'id' => 2,
+                    'name' => 'Ultraboost 22',
+                    'category' => 'Training',
+                    'price' => 149.99,
+                    'image_url' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80',
+                ],
+            ],
+            (object) [
+                'id' => 3,
+                'product' => (object) [
+                    'id' => 3,
+                    'name' => 'Jordan Legacy',
+                    'category' => 'Basketball',
+                    'price' => 159.99,
+                    'image_url' => 'https://images.unsplash.com/photo-1526178615590-8d5f6c9b9b1f?auto=format&fit=crop&w=900&q=80',
+                ],
+            ],
+        ]);
+
+        return view('user.wishlist', compact('wishlistItems'));
     }
 
     public function show(int $shoeId)
@@ -27,6 +66,7 @@ class ShoeController extends Controller
             'brand',
             'variations',
             'options',
+            'images',
         ])->findOrFail($shoeId);
 
         $sizes = $shoe->variations
@@ -56,7 +96,7 @@ class ShoeController extends Controller
             })
             ->values();
 
-        return view('product-details', compact('shoe', 'sizes', 'colors', 'variationMatrix'));
+        return view('user.product-details', compact('shoe', 'sizes', 'colors', 'variationMatrix'));
     }
 
     public function getAllShoes()

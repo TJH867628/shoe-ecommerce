@@ -172,15 +172,15 @@
                     <!-- Sample Product Card (Repeat for each product) -->
                     @php
                         $sampleProducts = [
-                            ['id' => 1, 'name' => 'Air Max Pro', 'brand' => 'Nike', 'price' => 129.99, 'image' => 'https://via.placeholder.com/300?text=Air+Max+Pro', 'rating' => 5, 'reviews' => 128, 'discount' => 18],
-                            ['id' => 2, 'name' => 'Ultraboost 22', 'brand' => 'Adidas', 'price' => 149.99, 'image' => 'https://via.placeholder.com/300?text=Ultraboost+22', 'rating' => 5, 'reviews' => 95, 'discount' => 15],
-                            ['id' => 3, 'name' => 'Jordan Legacy', 'brand' => 'Jordan', 'price' => 159.99, 'image' => 'https://via.placeholder.com/300?text=Jordan+Legacy', 'rating' => 5, 'reviews' => 203, 'discount' => 20],
-                            ['id' => 4, 'name' => 'RS-X Games', 'brand' => 'Puma', 'price' => 99.99, 'image' => 'https://via.placeholder.com/300?text=RS-X+Games', 'rating' => 4, 'reviews' => 67, 'discount' => 12],
-                            ['id' => 5, 'name' => '990v6', 'brand' => 'New Balance', 'price' => 139.99, 'image' => 'https://via.placeholder.com/300?text=990v6', 'rating' => 5, 'reviews' => 142, 'discount' => 10],
-                            ['id' => 6, 'name' => 'Chuck 70', 'brand' => 'Converse', 'price' => 69.99, 'image' => 'https://via.placeholder.com/300?text=Chuck+70', 'rating' => 4, 'reviews' => 89, 'discount' => 8],
-                            ['id' => 7, 'name' => 'Old Skool Pro', 'brand' => 'Vans', 'price' => 79.99, 'image' => 'https://via.placeholder.com/300?text=Old+Skool+Pro', 'rating' => 5, 'reviews' => 156, 'discount' => 14],
-                            ['id' => 8, 'name' => 'Timberland Classic', 'brand' => 'Timberland', 'price' => 189.99, 'image' => 'https://via.placeholder.com/300?text=Timberland+Classic', 'rating' => 4, 'reviews' => 110, 'discount' => 5],
-                            ['id' => 9, 'name' => 'Dunk Low SB', 'brand' => 'Nike', 'price' => 119.99, 'image' => 'https://via.placeholder.com/300?text=Dunk+Low+SB', 'rating' => 5, 'reviews' => 234, 'discount' => 16],
+                            ['id' => 1, 'name' => 'Air Max Pro', 'brand' => 'Nike', 'price' => 129.99, 'image' => 'https://images.unsplash.com/photo-1528701800489-47645c2a34f2?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 128, 'discount' => 18],
+                            ['id' => 2, 'name' => 'Ultraboost 22', 'brand' => 'Adidas', 'price' => 149.99, 'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 95, 'discount' => 15],
+                            ['id' => 3, 'name' => 'Jordan Legacy', 'brand' => 'Jordan', 'price' => 159.99, 'image' => 'https://images.unsplash.com/photo-1526178615590-8d5f6c9b9b1f?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 203, 'discount' => 20],
+                            ['id' => 4, 'name' => 'RS-X Games', 'brand' => 'Puma', 'price' => 99.99, 'image' => 'https://images.unsplash.com/photo-1542293787938-c9e299b880f4?auto=format&fit=crop&w=800&q=80', 'rating' => 4, 'reviews' => 67, 'discount' => 12],
+                            ['id' => 5, 'name' => '990v6', 'brand' => 'New Balance', 'price' => 139.99, 'image' => 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 142, 'discount' => 10],
+                            ['id' => 6, 'name' => 'Chuck 70', 'brand' => 'Converse', 'price' => 69.99, 'image' => 'https://images.unsplash.com/photo-1562158070-3f9a6b7d6f5b?auto=format&fit=crop&w=800&q=80', 'rating' => 4, 'reviews' => 89, 'discount' => 8],
+                            ['id' => 7, 'name' => 'Old Skool Pro', 'brand' => 'Vans', 'price' => 79.99, 'image' => 'https://images.unsplash.com/photo-1562158070-2b192f6d9b7a?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 156, 'discount' => 14],
+                            ['id' => 8, 'name' => 'Timberland Classic', 'brand' => 'Timberland', 'price' => 189.99, 'image' => 'https://images.unsplash.com/photo-1549989472-4d9b6f5a9c8c?auto=format&fit=crop&w=800&q=80', 'rating' => 4, 'reviews' => 110, 'discount' => 5],
+                            ['id' => 9, 'name' => 'Dunk Low SB', 'brand' => 'Nike', 'price' => 119.99, 'image' => 'https://images.unsplash.com/photo-1520975911147-0c3c8b2b12b4?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 234, 'discount' => 16],
                         ];
                     @endphp
 
@@ -206,9 +206,9 @@
                                 </button>
 
                                 <!-- Quick View Button -->
-                                <button class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white font-semibold py-3 translate-y-full group-hover:translate-y-0 transition duration-300">
+                                <a href="{{ route('products.show', ['shoeId' => $product['id']]) }}" class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white font-semibold py-3 translate-y-full group-hover:translate-y-0 transition duration-300 text-center">
                                     Quick View
-                                </button>
+                                </a>
                             </div>
 
                             <!-- Product Info -->

@@ -7,7 +7,7 @@
                     <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-slate-900">
                         <span class="font-black text-lg italic">S</span>
                     </div>
-                    <span class="text-xl font-black tracking-tighter text-white">SoleStore.</span>
+                    <span class="text-xl font-black tracking-tighter text-white">2Step.</span>
                 </div>
                 <p class="text-slate-400 text-sm leading-relaxed max-w-xs">
                     Premium footwear for the modern era. Curated selections of the world's best sneakers.
@@ -47,7 +47,7 @@
         </div>
 
         <div class="flex flex-col md:flex-row justify-between items-center pt-8 text-xs font-bold text-slate-600 uppercase tracking-widest gap-4">
-            <p>&copy; {{ date('Y') }} SoleStore Inc. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} 2Step Inc. All rights reserved.</p>
             <div class="flex gap-6">
                 <a href="#" class="hover:text-white transition-colors">Privacy</a>
                 <a href="#" class="hover:text-white transition-colors">Terms</a>

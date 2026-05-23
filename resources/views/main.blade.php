@@ -45,7 +45,7 @@
                 <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-2">Trending Now</h2>
                 <p class="text-slate-500 font-medium">The most sought-after silhouettes this week.</p>
             </div>
-            <a href="{{ url('/shop') }}" class="hidden md:flex items-center gap-2 text-slate-900 font-bold hover:text-red-600 transition-colors">
+            <a href="{{ url('/user/product') }}" class="hidden md:flex items-center gap-2 text-slate-900 font-bold hover:text-red-600 transition-colors">
                 View All <i class="fas fa-chevron-right"></i>
             </a>
         </div>

@@ -12,12 +12,15 @@ GET
 Route::get('/', function () {
     return view('main');
 });
+Route::view('/about', 'user.about')->name('about');
 Route::get('register',[UserController::class, 'registerPage']) -> name('register');
 Route::get('login',[UserController::class, 'loginPage']) -> name('login');
-Route::get('product', [ShoeController::class, 'index'])->name('product');
+Route::get('/user/product', [ShoeController::class, 'index'])->name('product');
+Route::get('/user/wishlist', [ShoeController::class, 'wishlist'])->name('wishlist');
+Route::view('/user/cart', 'user.cart')->name('cart.index');
 Route::get('/brands', [BrandController::class, 'getAllBrands']);
 Route::get('/shoes', [ShoeController::class, 'getAllShoes']);
-Route::get('/products/{shoeId}', [ShoeController::class, 'show'])->name('products.show');
+Route::get('/user/products/{shoeId}', [ShoeController::class, 'show'])->name('products.show');
 Route::get('/shoes/admin/{shoeId}', [ShoeController::class, 'getAdminShoeDetails']);
 Route::get('/shoes/search', [ShoeController::class, 'searchShoes']);
 Route::get('/shoes/brand/{brandId}', [ShoeController::class, 'getShoesByBrand']);
