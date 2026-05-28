@@ -16,9 +16,9 @@ class ToyyibPayPaymentAdapter
 
     public function createCheckoutPayload(float $amount, array $customer = []): array
     {
-        $secretKey = config('services.toyyibpay.secret_key');
-        $categoryCode = config('services.toyyibpay.category_code');
-        $baseUrl = config('services.toyyibpay.base_url');
+        $secretKey = "2syf8kwx-ouwa-49cl-nzll-w4mkkeg4edix";
+        $categoryCode = "3a4pwn1b";
+        $baseUrl = "https://dev.toyyibpay.com";
         $returnUrl = $customer['return_url'] ?? route('toyyibpay.return');
         $callbackUrl = $customer['callback_url'] ?? route('toyyibpay.callback');
 
