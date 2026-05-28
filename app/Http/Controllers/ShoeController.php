@@ -304,13 +304,27 @@ class ShoeController extends Controller
     public function updateShoe(Request $request, int $shoeId)
     {
         $shoe = Shoe::findOrFail($shoeId);
-
         $shoe->update([
-            'brand_id' => $request->brand_id,
-            'shoe_name' => $request->shoe_name,
-            'shoe_description' => $request->shoe_description,
-            'shoe_price' => $request->shoe_price
+            'brand_id' => $request->brand_id ?? $shoe->brand_id,
+            'shoe_name' => $request->shoe_name ?? $shoe->shoe_name,
+            'shoe_description' => $request->shoe_description ?? $shoe->shoe_description,
+            'shoe_price' => $request->shoe_price ?? $shoe->shoe_price
         ]);
+
+        $shoe->load([
+            'brand',
+            'variations'
+        ]);
+
+        foreach ($shoe->variations as $variation) {
+            $variation->sku_code =
+                AdminShoeSkuBuilder::generateSkuCode(
+                    $shoe,
+                    $variation->attributes
+                );
+
+            $variation->save();
+        }
 
         return back()->with('success', 'Shoe updated successfully.');
     }
@@ -370,7 +384,6 @@ class ShoeController extends Controller
     public function updateSku(Request $request, int $variationId)
     {
         $variation = ShoeVariations::findOrFail($variationId);
-
         $attributes = $request->input('attributes', []);
 
         if ($this->hasDuplicateVariation($variation->shoe_id, $attributes, $variationId)) {
@@ -398,19 +411,7 @@ class ShoeController extends Controller
 
         $shoe = Shoe::with('brand')->findOrFail($variation->shoe_id);
 
-        $brand = strtoupper($shoe->brand->brand_name);
-
-        $model = strtoupper(
-            preg_replace('/\s+/', '', $shoe->shoe_name)
-        );
-
-        $attributeParts = [];
-
-        foreach ($attributes as $value) {
-            $attributeParts[] = strtoupper($value);
-        }
-
-        $skuCode = "SH-" . $shoe->id . "-" . $brand . "-" . $model . "-" . implode('-', $attributeParts);
+        $skuCode = AdminShoeSkuBuilder::generateSkuCode($shoe, $attributes);
 
         $variation->update([
             'attributes' => $attributes,

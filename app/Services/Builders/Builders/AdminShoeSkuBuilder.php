@@ -56,20 +56,7 @@ class AdminShoeSkuBuilder implements ShoeSkuBuilderInterface
 
         $shoe = Shoe::with('brand')->findOrFail($shoeId);
 
-        $brand = strtoupper($shoe->brand->brand_name);
-
-        $model = strtoupper(
-            preg_replace('/\s+/', '', $shoe->shoe_name)
-        );
-
-        $attributeParts = [];
-
-        foreach ($attributes as $value) {
-
-            $attributeParts[] = strtoupper($value);
-        }
-
-        $skuCode = "SH-" . $shoe->id . '-' .$brand . '-' . $model . '-' . implode('-', $attributeParts);
+        $skuCode = self::generateSkuCode($shoe, $attributes);
 
         $this->variations[] = [
             'shoe_id' => $shoeId,
@@ -85,4 +72,23 @@ class AdminShoeSkuBuilder implements ShoeSkuBuilderInterface
     {
         return $this->variations;
     }
+
+    public static function generateSkuCode(Shoe $shoe, array $attributes): string
+    {
+        $brand = strtoupper($shoe->brand->brand_name);
+
+        $model = strtoupper(
+            preg_replace('/\s+/', '', $shoe->shoe_name)
+        );
+
+        $attributeParts = [];
+
+        foreach ($attributes as $value) {
+
+            $attributeParts[] = strtoupper($value);
+        }
+
+        return "SH-" . $shoe->id . '-' .$brand . '-' . $model . '-' . implode('-', $attributeParts);
+    }
 }
+

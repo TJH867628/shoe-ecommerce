@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Prototype\ShoePrototype;
 
-class Shoe extends Model
+class Shoe extends Model implements ShoePrototype
 {
     use HasFactory;
 
@@ -39,5 +40,12 @@ class Shoe extends Model
     public function images()
     {
         return $this->hasMany( ShoeImage::class );
+    }
+
+    public function cloneShoe()
+    {
+        //replicate is a built in laravel method that creates a copy of the model instance without saving it to the database
+        //it will copy all the attributes of the shoe except the id and timestamps, allowing you to create a new shoe based on an existing one
+        return $this->replicate();
     }
 }
