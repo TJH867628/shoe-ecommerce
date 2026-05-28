@@ -2,7 +2,9 @@
 //Product Interface
 namespace App\Payments;
 
-interface Payment
+use App\Contracts\ToyyibPayPaymentMethod;
+
+interface Payment extends ToyyibPayPaymentMethod
 {
     public function pay(float $amount);
 }

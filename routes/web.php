@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShoePrototypeController;
 use App\Http\Controllers\PaymentController;
+use Illuminate\Http\Request;
 
 use App\Models\Shoe;
 /*
@@ -15,7 +16,6 @@ GET
 Route::get('/', function () {
     return view('main');    
 });
-Route::view('/about', 'user.about')->name('about');
 Route::get('register',[UserController::class, 'registerPage']) -> name('register');
 Route::get('login',[UserController::class, 'loginPage']) -> name('login');
 Route::get('/user/product', [ShoeController::class, 'index'])->name('product');
@@ -50,6 +50,28 @@ Route::get('/test-manage-shoes', function ()
         compact('shoes')
     );
 });
+Route::get('/payment/toyyibpay/return', function (Request $request) {
+    $statusId = (string) $request->query('status_id');
+
+    $message = match ($statusId) {
+        '1' => 'ToyyibPay payment completed successfully.',
+        '2' => 'ToyyibPay payment is still pending.',
+        '3' => 'ToyyibPay payment failed.',
+        default => 'Returned from ToyyibPay without a payment status.',
+    };
+
+    $flashKey = $statusId === '3' ? 'failed' : 'success';
+
+    return redirect()
+        ->route('test-payment')
+        ->with($flashKey, $message)
+        ->with('checkout_result', [
+            'status_id' => $statusId,
+            'billcode' => $request->query('billcode'),
+            'order_id' => $request->query('order_id'),
+        ]);
+})->name('toyyibpay.return');
+
 /*
 POST
 */
@@ -61,6 +83,10 @@ Route::post('/shoe-variations/{variationId}/images',[ShoeController::class, 'upl
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::post('shoes/{shoeId}/clone', [ShoePrototypeController::class, 'clone'])->name('shoes.clone');
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
+Route::post('/payment/toyyibpay/callback', function () {
+    return response()->json(['status' => 'ok']);
+})->name('toyyibpay.callback');
+
 
 /*
 PUT
@@ -80,5 +106,6 @@ Route::delete('/shoe/variations/image/{imageId}', [ShoeController::class, 'remov
 /*
 VIEW
 */
+Route::view('/about', 'user.about')->name('about');
 Route::view('/test-create-shoes', 'test-create-shoes')->name('test-create-shoes');
 Route::view('/test-payment', 'test-payment')->name('test-payment');
