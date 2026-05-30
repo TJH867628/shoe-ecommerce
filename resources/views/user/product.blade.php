@@ -26,7 +26,7 @@
         <div class="flex flex-col lg:flex-row gap-8">
 
             <!-- SIDEBAR: Filters -->
-            <aside class="w-full lg:w-64 flex-shrink-0">
+            <aside class="w-full lg:w-64 shrink-0">
                 
                 <!-- Mobile Filter Toggle -->
                 <button id="toggleFilters" class="w-full lg:hidden mb-4 bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition">
@@ -64,9 +64,6 @@
                     <div class="border-t pt-6">
                         <label class="block text-sm font-bold text-slate-900 mb-3">Brand</label>
                         <div class="space-y-2 max-h-60 overflow-y-auto">
-                            @php
-                                $brands = ['Nike', 'Adidas', 'Puma', 'New Balance', 'Jordan', 'Converse', 'Vans', 'Timberland'];
-                            @endphp
                             @foreach($brands as $brand)
                                 <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition">
                                     <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-slate-300" value="{{ $brand }}">
@@ -80,9 +77,6 @@
                     <div class="border-t pt-6">
                         <label class="block text-sm font-bold text-slate-900 mb-3">Size</label>
                         <div class="grid grid-cols-3 gap-2">
-                            @php
-                                $sizes = ['6', '7', '8', '9', '10', '11', '12', '13'];
-                            @endphp
                             @foreach($sizes as $size)
                                 <button class="size-filter-btn p-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition">
                                     {{ $size }}
@@ -96,35 +90,25 @@
                         <label class="block text-sm font-bold text-slate-900 mb-3">Color</label>
                         <div class="space-y-2">
                             @php
-                                $colors = ['White' => '#ffffff', 'Black' => '#000000', 'Red' => '#ef4444', 'Blue' => '#3b82f6', 'Gray' => '#9ca3af', 'Brown' => '#92400e'];
-                            @endphp
-                            @foreach($colors as $colorName => $colorCode)
-                                <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition">
-                                    <div class="w-6 h-6 rounded border border-slate-300" style="background-color: {{ $colorCode }}"></div>
-                                    <span class="text-sm text-slate-700">{{ $colorName }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
+                                $allColors = collect($sampleProducts)
+                                    ->flatMap(fn($p) => $p['colors'] ?? [])
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->all();
 
-                    <!-- Rating Filter -->
-                    <div class="border-t pt-6">
-                        <label class="block text-sm font-bold text-slate-900 mb-3">Rating</label>
-                        <div class="space-y-2">
-                            @for($i = 5; $i >= 3; $i--)
-                                <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition">
-                                    <input type="checkbox" class="w-4 h-4 rounded border-slate-300">
-                                    <div class="flex items-center gap-1">
-                                        @for($j = 0; $j < $i; $j++)
-                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        @endfor
-                                        @for($j = $i; $j < 5; $j++)
-                                            <i class="far fa-star text-yellow-400 text-xs"></i>
-                                        @endfor
-                                    </div>
-                                    <span class="text-xs text-slate-600">& up</span>
-                                </label>
-                            @endfor
+                                $colorClasses = ['White' => 'bg-white', 'Black' => 'bg-black', 'Red' => 'bg-red-500', 'Blue' => 'bg-blue-500', 'Gray' => 'bg-gray-400', 'Brown' => 'bg-amber-800'];
+                            @endphp
+                            <div class="flex flex-wrap gap-2">
+                                @forelse($allColors as $colorName)
+                                    <button type="button" data-color="{{ $colorName }}" class="color-filter-btn flex items-center gap-3 p-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition">
+                                        <div class="w-6 h-6 rounded {{ $colorClasses[$colorName] ?? 'bg-slate-400' }} border border-slate-300"></div>
+                                        <span class="text-sm text-slate-700">{{ $colorName }}</span>
+                                    </button>
+                                @empty
+                                    <div class="text-sm text-slate-500">No colors available</div>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
 
@@ -169,23 +153,8 @@
                 <!-- Products Grid -->
                 <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     
-                    <!-- Sample Product Card (Repeat for each product) -->
-                    @php
-                        $sampleProducts = [
-                            ['id' => 1, 'name' => 'Air Max Pro', 'brand' => 'Nike', 'price' => 129.99, 'image' => 'https://images.unsplash.com/photo-1528701800489-47645c2a34f2?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 128, 'discount' => 18],
-                            ['id' => 2, 'name' => 'Ultraboost 22', 'brand' => 'Adidas', 'price' => 149.99, 'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 95, 'discount' => 15],
-                            ['id' => 3, 'name' => 'Jordan Legacy', 'brand' => 'Jordan', 'price' => 159.99, 'image' => 'https://images.unsplash.com/photo-1526178615590-8d5f6c9b9b1f?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 203, 'discount' => 20],
-                            ['id' => 4, 'name' => 'RS-X Games', 'brand' => 'Puma', 'price' => 99.99, 'image' => 'https://images.unsplash.com/photo-1542293787938-c9e299b880f4?auto=format&fit=crop&w=800&q=80', 'rating' => 4, 'reviews' => 67, 'discount' => 12],
-                            ['id' => 5, 'name' => '990v6', 'brand' => 'New Balance', 'price' => 139.99, 'image' => 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 142, 'discount' => 10],
-                            ['id' => 6, 'name' => 'Chuck 70', 'brand' => 'Converse', 'price' => 69.99, 'image' => 'https://images.unsplash.com/photo-1562158070-3f9a6b7d6f5b?auto=format&fit=crop&w=800&q=80', 'rating' => 4, 'reviews' => 89, 'discount' => 8],
-                            ['id' => 7, 'name' => 'Old Skool Pro', 'brand' => 'Vans', 'price' => 79.99, 'image' => 'https://images.unsplash.com/photo-1562158070-2b192f6d9b7a?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 156, 'discount' => 14],
-                            ['id' => 8, 'name' => 'Timberland Classic', 'brand' => 'Timberland', 'price' => 189.99, 'image' => 'https://images.unsplash.com/photo-1549989472-4d9b6f5a9c8c?auto=format&fit=crop&w=800&q=80', 'rating' => 4, 'reviews' => 110, 'discount' => 5],
-                            ['id' => 9, 'name' => 'Dunk Low SB', 'brand' => 'Nike', 'price' => 119.99, 'image' => 'https://images.unsplash.com/photo-1520975911147-0c3c8b2b12b4?auto=format&fit=crop&w=800&q=80', 'rating' => 5, 'reviews' => 234, 'discount' => 16],
-                        ];
-                    @endphp
-
                     @foreach($sampleProducts as $product)
-                        <div class="product-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition group">
+                        <div class="product-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition group" data-product-id="{{ $product['id'] }}">
                             
                             <!-- Image Container -->
                             <div class="relative overflow-hidden bg-slate-100 aspect-square">
@@ -194,14 +163,12 @@
                                      class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
                                 
                                 <!-- Discount Badge -->
-                                @if($product['discount'] > 0)
-                                    <div class="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                        -{{ $product['discount'] }}%
-                                    </div>
-                                @endif
+                                <div class="absolute top-3 right-3 bg-slate-900 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                    In stock: {{ $product['stock'] }}
+                                </div>
 
                                 <!-- Wishlist Button -->
-                                <button class="absolute top-3 left-3 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-red-50 transition opacity-0 group-hover:opacity-100">
+                                <button type="button" class="wishlist-btn absolute top-3 left-3 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-red-50 transition opacity-0 group-hover:opacity-100 cursor-pointer" data-shoe-id="{{ $product['id'] }}" title="Add to wishlist">
                                     <i class="far fa-heart text-red-500 text-lg"></i>
                                 </button>
 
@@ -218,34 +185,29 @@
                                     {{ $product['name'] }}
                                 </h3>
 
-                                <!-- Rating -->
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="flex items-center gap-0.5">
-                                        @for($i = 0; $i < $product['rating']; $i++)
-                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        @endfor
-                                        @for($i = $product['rating']; $i < 5; $i++)
-                                            <i class="far fa-star text-yellow-400 text-xs"></i>
-                                        @endfor
-                                    </div>
-                                    <span class="text-xs text-slate-600">({{ $product['reviews'] }})</span>
-                                </div>
-
                                 <!-- Price -->
                                 <div class="flex items-baseline gap-2 mb-4">
-                                    <span class="text-lg font-bold text-slate-900">${{ number_format($product['price'], 2) }}</span>
-                                    @if($product['discount'] > 0)
-                                        <span class="text-sm text-slate-500 line-through">
-                                            ${{ number_format($product['price'] / (1 - $product['discount']/100), 2) }}
-                                        </span>
-                                    @endif
+                                    <span class="text-lg font-bold text-slate-900">RM{{ number_format($product['price'], 2) }}</span>
                                 </div>
 
                                 <!-- Add to Cart Button -->
-                                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-shopping-cart text-sm"></i>
-                                    Add to Cart
-                                </button>
+                                @if(!empty($product['variation_id']))
+                                    <form action="{{ route('cart.add') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="shoe_id" value="{{ $product['id'] }}">
+                                        <input type="hidden" name="variation_id" value="{{ $product['variation_id'] }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                                            <i class="fas fa-shopping-cart text-sm"></i>
+                                            Add to Cart
+                                        </button>
+                                    </form>
+                                @else
+                                    <button type="button" disabled class="w-full bg-slate-300 text-slate-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
+                                        <i class="fas fa-shopping-cart text-sm"></i>
+                                        Add to Cart
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     @endforeach
@@ -253,27 +215,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="flex items-center justify-center gap-2 mt-12">
-                    <button class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition font-semibold">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    
-                    @for($i = 1; $i <= 5; $i++)
-                        @if($i == 1)
-                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
-                                {{ $i }}
-                            </button>
-                        @else
-                            <button class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition font-semibold">
-                                {{ $i }}
-                            </button>
-                        @endif
-                    @endfor
-                    
-                    <button class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition font-semibold">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+                <div id="pagination" class="flex items-center justify-center gap-2 mt-12"></div>
 
             </main>
 
@@ -285,13 +227,16 @@
 <style>
     .line-clamp-2 {
         display: -webkit-box;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
     .grid-view-btn.active {
-        @apply bg-blue-600 text-white border-blue-600;
+        background-color: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
     }
 
     input[type="range"] {
@@ -329,7 +274,7 @@
             height: 100vh;
             background: white;
             z-index: 50;
-            overflow-y-auto;
+            overflow-y: auto;
             transition: left 0.3s ease;
             padding: 24px;
         }
@@ -341,76 +286,300 @@
 </style>
 
 <script>
-    // Toggle Filters on Mobile
-    document.getElementById('toggleFilters').addEventListener('click', function() {
-        const panel = document.getElementById('filtersPanel');
-        panel.classList.toggle('active');
-    });
+    // Wishlist Management
+    let wishlistState = new Set();
 
-    // Price Slider
-    document.getElementById('priceMin').addEventListener('input', function() {
-        document.getElementById('priceDisplay').textContent = Math.round(this.value);
-    });
+    // Expose products for client-side filtering and pagination
+    window.__products = {!! json_encode($sampleProducts) !!};
 
-    // Grid View Toggle
-    function setGridView(cols) {
-        const grid = document.getElementById('productsGrid');
-        grid.className = `grid gap-6`;
-        
-        if (cols === 1) {
-            grid.classList.add('grid-cols-1');
-        } else if (cols === 2) {
-            grid.classList.add('sm:grid-cols-1', 'lg:grid-cols-2');
-        } else {
-            grid.classList.add('sm:grid-cols-2', 'lg:grid-cols-3');
+    // Load wishlist state from session
+    async function initializeWishlist() {
+        try {
+            const response = await fetch('{{ route("wishlist.items") }}');
+            const data = await response.json();
+            if (data.success) {
+                data.items.forEach(item => {
+                    wishlistState.add(item.product.id);
+                });
+                updateWishlistUI();
+            }
+        } catch (error) {
+            console.error('Error loading wishlist:', error);
         }
-
-        // Update active button
-        document.querySelectorAll('.grid-view-btn').forEach((btn, idx) => {
-            btn.classList.remove('active');
-            if (idx === (3 - cols)) btn.classList.add('active');
-        });
     }
 
-    // Search Filter
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        filterProducts();
-    });
-
-    // Sort Products
-    document.getElementById('sortSelect').addEventListener('change', function(e) {
-        console.log('Sorting by:', e.target.value);
-        // Add sorting logic here
-    });
-
-    // Clear All Filters
-    function clearAllFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('priceMin').value = 0;
-        document.getElementById('priceDisplay').textContent = '0';
-        document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
-        document.querySelectorAll('.size-filter-btn').forEach(btn => btn.classList.remove('active'));
-        filterProducts();
-    }
-
-    // Filter Products
-    function filterProducts() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const cards = document.querySelectorAll('.product-card');
-        let visibleCount = 0;
-
-        cards.forEach(card => {
-            const name = card.querySelector('h3').textContent.toLowerCase();
-            if (name.includes(searchTerm)) {
-                card.style.display = '';
-                visibleCount++;
+    function updateWishlistUI() {
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            const shoeId = parseInt(btn.getAttribute('data-shoe-id'));
+            const icon = btn.querySelector('i');
+            
+            if (wishlistState.has(shoeId)) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                btn.title = 'Remove from wishlist';
             } else {
-                card.style.display = 'none';
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                btn.title = 'Add to wishlist';
             }
         });
-
-        document.getElementById('shoeCount').textContent = `Showing ${visibleCount} products`;
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize wishlist
+        initializeWishlist();
+
+        // Wishlist button handlers
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const shoeId = parseInt(this.getAttribute('data-shoe-id'));
+                const isInWishlist = wishlistState.has(shoeId);
+                const route = isInWishlist 
+                    ? `/wishlist/remove/${shoeId}` 
+                    : `/wishlist/add/${shoeId}`;
+
+                try {
+                    const response = await fetch(route, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.status === 401) {
+                        alert('Please login to manage your wishlist');
+                        window.location.href = '{{ route("login") }}';
+                        return;
+                    }
+
+                    if (data.success) {
+                        if (isInWishlist) {
+                            wishlistState.delete(shoeId);
+                        } else {
+                            wishlistState.add(shoeId);
+                        }
+                        updateWishlistUI();
+                    } else {
+                        alert(data.message || 'Error updating wishlist');
+                    }
+                } catch (error) {
+                    console.error('Error updating wishlist:', error);
+                    alert('Error updating wishlist');
+                }
+            });
+        });
+
+        // Toggle Filters on Mobile
+        document.getElementById('toggleFilters').addEventListener('click', function() {
+            const panel = document.getElementById('filtersPanel');
+            panel.classList.toggle('active');
+        });
+
+        // Price Slider
+        document.getElementById('priceMin').addEventListener('input', function() {
+            document.getElementById('priceDisplay').textContent = Math.round(this.value);
+            filterProducts(1);
+        });
+
+        // Brand checkbox change
+        document.querySelectorAll('.filter-checkbox').forEach(cb => cb.addEventListener('change', () => filterProducts(1)));
+
+        // Size filter buttons (toggle active)
+        document.querySelectorAll('.size-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.disabled) return;
+                this.classList.toggle('active');
+                filterProducts(1);
+            });
+        });
+
+        // Color option toggles
+        document.querySelectorAll('.color-filter-btn').forEach(lbl => {
+            lbl.addEventListener('click', function() {
+                if (this.disabled) return;
+                this.classList.toggle('active');
+                filterProducts(1);
+            });
+        });
+
+        // Grid View Toggle
+        function setGridView(cols) {
+            const grid = document.getElementById('productsGrid');
+            grid.className = `grid gap-6`;
+            
+            if (cols === 1) {
+                grid.classList.add('grid-cols-1');
+            } else if (cols === 2) {
+                grid.classList.add('sm:grid-cols-1', 'lg:grid-cols-2');
+            } else {
+                grid.classList.add('sm:grid-cols-2', 'lg:grid-cols-3');
+            }
+
+            // Update active button
+            document.querySelectorAll('.grid-view-btn').forEach((btn, idx) => {
+                btn.classList.remove('active');
+                if (idx === (3 - cols)) btn.classList.add('active');
+            });
+        }
+
+        // Search Filter
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            filterProducts();
+        });
+
+        // Sort Products
+        document.getElementById('sortSelect').addEventListener('change', function(e) {
+            console.log('Sorting by:', e.target.value);
+            // Add sorting logic here
+        });
+
+        // Clear All Filters
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('priceMin').value = 0;
+            document.getElementById('priceDisplay').textContent = '0';
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.size-filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.color-filter-btn').forEach(c => c.classList.remove('active'));
+            filterProducts(1);
+        }
+
+        // Filter Products with pagination
+        function filterProducts(page = 1) {
+            const perPage = 9; // products per page
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const minPrice = parseFloat(document.getElementById('priceMin').value) || 0;
+
+            // brands
+            const selectedBrands = Array.from(document.querySelectorAll('.filter-checkbox:checked')).map(i => i.value);
+
+            // sizes
+            const selectedSizes = Array.from(document.querySelectorAll('.size-filter-btn.active')).map(b => b.textContent.trim());
+
+            // colors
+            const selectedColors = Array.from(document.querySelectorAll('.color-filter-btn.active')).map(c => c.getAttribute('data-color'));
+
+            // Filter using window.__products
+            const filtered = window.__products.filter(p => {
+                if (searchTerm && !p.name.toLowerCase().includes(searchTerm)) return false;
+                if (minPrice && parseFloat(p.price) < minPrice) return false;
+                if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
+                if (selectedSizes.length && (!p.sizes || !p.sizes.some(s => selectedSizes.includes(String(s))))) return false;
+                if (selectedColors.length && (!p.colors || !p.colors.some(c => selectedColors.includes(String(c))))) return false;
+                return true;
+            });
+
+            // Compute availability for sizes/colors in real-time
+            const filteredExceptSizes = window.__products.filter(p => {
+                if (searchTerm && !p.name.toLowerCase().includes(searchTerm)) return false;
+                if (minPrice && parseFloat(p.price) < minPrice) return false;
+                if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
+                // do NOT apply size filter here
+                if (selectedColors.length && (!p.colors || !p.colors.some(c => selectedColors.includes(String(c))))) return false;
+                return true;
+            });
+
+            const filteredExceptColors = window.__products.filter(p => {
+                if (searchTerm && !p.name.toLowerCase().includes(searchTerm)) return false;
+                if (minPrice && parseFloat(p.price) < minPrice) return false;
+                if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
+                // do NOT apply color filter here
+                if (selectedSizes.length && (!p.sizes || !p.sizes.some(s => selectedSizes.includes(String(s))))) return false;
+                return true;
+            });
+
+            const availableSizes = new Set(filteredExceptSizes.flatMap(p => p.sizes || []).map(String));
+            const availableColors = new Set(filteredExceptColors.flatMap(p => p.colors || []).map(String));
+
+            // Update size buttons availability
+            document.querySelectorAll('.size-filter-btn').forEach(btn => {
+                const size = btn.textContent.trim();
+                const isAvailable = availableSizes.has(size);
+                btn.disabled = !isAvailable;
+                if (isAvailable) {
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    if (btn.classList.contains('active')) btn.classList.remove('active');
+                }
+            });
+
+            // Update color buttons availability
+            document.querySelectorAll('.color-filter-btn').forEach(btn => {
+                const color = btn.getAttribute('data-color');
+                const isAvailable = availableColors.has(String(color));
+                btn.disabled = !isAvailable;
+                if (isAvailable) {
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    if (btn.classList.contains('active')) btn.classList.remove('active');
+                }
+            });
+
+            const total = filtered.length;
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+            const currentPage = Math.min(Math.max(1, page), totalPages);
+            const start = (currentPage - 1) * perPage;
+            const pageItems = filtered.slice(start, start + perPage);
+
+            // show/hide product cards based on filtered page items
+            document.querySelectorAll('.product-card').forEach(card => {
+                const pid = parseInt(card.getAttribute('data-product-id'));
+                const shouldShow = pageItems.some(p => p.id == pid);
+                card.style.display = shouldShow ? '' : 'none';
+            });
+
+            document.getElementById('shoeCount').textContent = `Showing ${total} products`;
+
+            renderPagination(totalPages, currentPage);
+        }
+
+        function renderPagination(totalPages, currentPage) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            const makeBtn = (label, page, disabled = false, cls = '') => {
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition font-semibold ${cls}`;
+                btn.textContent = label;
+                if (disabled) btn.disabled = true;
+                btn.addEventListener('click', () => filterProducts(page));
+                return btn;
+            };
+
+            // Prev
+            container.appendChild(makeBtn('‹', Math.max(1, currentPage - 1), currentPage === 1));
+
+            // pages (show up to 7 pages window)
+            const maxButtons = 7;
+            let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let end = Math.min(totalPages, start + maxButtons - 1);
+            if (end - start + 1 < maxButtons) start = Math.max(1, end - maxButtons + 1);
+
+            for (let p = start; p <= end; p++) {
+                const btn = makeBtn(String(p), p, false, p === currentPage ? 'bg-blue-600 text-white border-blue-600' : '');
+                container.appendChild(btn);
+            }
+
+            // Next
+            container.appendChild(makeBtn('›', Math.min(totalPages, currentPage + 1), currentPage === totalPages));
+        }
+
+        window.setGridView = setGridView;
+        window.clearAllFilters = clearAllFilters;
+        window.filterProducts = filterProducts;
+
+        // initial filter render
+        filterProducts(1);
+    });
 </script>
 @endsection

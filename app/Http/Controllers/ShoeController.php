@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Shoe;
 use App\Models\ShoeVariations;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use App\Services\Builders\Builders\AdminShoeBuilder;
 use App\Services\Builders\Builders\AdminShoeSkuBuilder;
@@ -18,44 +20,56 @@ class ShoeController extends Controller
 {
     public function index()
     {
-        return view('user.product');
+        $shoes = Shoe::with(['brand', 'images', 'variations'])
+            ->latest()
+            ->get();
+
+        $sampleProducts = $shoes->map(function (Shoe $shoe) {
+            return $this->buildProductCardData($shoe);
+        });
+
+        $brands = Brand::orderBy('brand_name')->pluck('brand_name');
+
+        $sizes = ShoeVariations::query()
+            ->get()
+            ->map(fn (ShoeVariations $variation) => data_get($variation->attributes, 'size'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('user.product', compact('sampleProducts', 'brands', 'sizes'));
     }
 
     public function wishlist()
     {
-        //fake data for wishlist page
-        $wishlistItems = collect([
-            (object) [
-                'id' => 1,
-                'product' => (object) [
-                    'id' => 1,
-                    'name' => 'Air Max Pro',
-                    'category' => 'Running',
-                    'price' => 129.99,
-                    'image_url' => 'https://images.unsplash.com/photo-1528701800489-47645c2a34f2?auto=format&fit=crop&w=900&q=80',
-                ],
-            ],
-            (object) [
-                'id' => 2,
-                'product' => (object) [
-                    'id' => 2,
-                    'name' => 'Ultraboost 22',
-                    'category' => 'Training',
-                    'price' => 149.99,
-                    'image_url' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80',
-                ],
-            ],
-            (object) [
-                'id' => 3,
-                'product' => (object) [
-                    'id' => 3,
-                    'name' => 'Jordan Legacy',
-                    'category' => 'Basketball',
-                    'price' => 159.99,
-                    'image_url' => 'https://images.unsplash.com/photo-1526178615590-8d5f6c9b9b1f?auto=format&fit=crop&w=900&q=80',
-                ],
-            ],
-        ]);
+        $user = auth()->user();
+        
+        if (!$user) {
+            $wishlistItems = collect();
+        } else {
+            $wishlistItems = Wishlist::where('user_id', $user->id)
+                ->with(['shoe' => function($query) {
+                    $query->with(['brand', 'images']);
+                }])
+                ->get()
+                ->map(function (Wishlist $wishlist) {
+                    $shoe = $wishlist->shoe;
+                    $image = $shoe->images->firstWhere('is_cover', true)
+                        ?? $shoe->images->sortBy('sort_order')->first();
+
+                    return (object) [
+                        'id' => $wishlist->id,
+                        'product' => (object) [
+                            'id' => $shoe->id,
+                            'name' => $shoe->shoe_name,
+                            'category' => $shoe->brand?->brand_name ?? 'Shoes',
+                            'price' => $shoe->shoe_price,
+                            'image_url' => $image?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image',
+                        ],
+                    ];
+                });
+        }
 
         return view('user.wishlist', compact('wishlistItems'));
     }
@@ -248,8 +262,6 @@ class ShoeController extends Controller
     public function createShoeOptions(Request $request)
     {
         $options = [];
-
-
         foreach ($request->option_names as $optionName) {
             if ($this->hasOption($request->shoe_id, $optionName)) {
                 return back()->with('error', 'This options already exist for this shoe.');
@@ -265,6 +277,40 @@ class ShoeController extends Controller
         ShoeOption::insert($options);
 
         return back()->with('success', 'Options added successfully.');
+    }
+
+    private function buildProductCardData(Shoe $shoe): array
+    {
+        $coverImage = $shoe->images->firstWhere('is_cover', true)
+            ?? $shoe->images->sortBy('sort_order')->first();
+        $firstVariation = $shoe->variations->first();
+
+        // Collect available sizes and colors for this shoe (used for client-side filtering)
+        $sizes = $shoe->variations
+            ->map(fn($v) => data_get($v->attributes, 'size'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $colors = $shoe->variations
+            ->map(fn($v) => data_get($v->attributes, 'color'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        return [
+            'id' => $shoe->id,
+            'name' => $shoe->shoe_name,
+            'brand' => $shoe->brand?->brand_name ?? 'Unknown',
+            'price' => $shoe->shoe_price,
+            'image' => $coverImage?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image',
+            'stock' => (int) $shoe->variations->sum('stock_quantity'),
+            'variation_id' => $firstVariation?->id,
+            'sizes' => $sizes,
+            'colors' => $colors,
+        ];
     }
 
     public function createSkus(Request $request)
@@ -431,5 +477,96 @@ class ShoeController extends Controller
         $variation->delete();
 
         return back()->with('success', 'Variation deleted successfully.');
+    }
+
+    public function addToWishlist(int $shoeId)
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to add items to wishlist'
+            ], 401);
+        }
+
+        // Check if shoe exists
+        $shoe = Shoe::findOrFail($shoeId);
+
+        // Create or ignore if already exists (due to unique constraint)
+        \App\Models\Wishlist::firstOrCreate(
+            ['user_id' => $user->id, 'shoe_id' => $shoeId]
+        );
+
+        $wishlistCount = \App\Models\Wishlist::where('user_id', $user->id)->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item added to wishlist',
+            'wishlist_count' => $wishlistCount
+        ]);
+    }
+
+    public function removeFromWishlist(int $shoeId)
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to remove items from wishlist'
+            ], 401);
+        }
+
+        \App\Models\Wishlist::where('user_id', $user->id)
+            ->where('shoe_id', $shoeId)
+            ->delete();
+
+        $wishlistCount = \App\Models\Wishlist::where('user_id', $user->id)->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from wishlist',
+            'wishlist_count' => $wishlistCount
+        ]);
+    }
+
+    public function getWishlistItems()
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'items' => []
+            ]);
+        }
+
+        $items = Wishlist::where('user_id', $user->id)
+            ->with(['shoe' => function($query) {
+                $query->with(['brand', 'images']);
+            }])
+            ->get()
+            ->map(function (Wishlist $wishlist) {
+                $shoe = $wishlist->shoe;
+                $image = $shoe->images->firstWhere('is_cover', true)
+                    ?? $shoe->images->sortBy('sort_order')->first();
+
+                return (object) [
+                    'id' => $wishlist->id,
+                    'product' => (object) [
+                        'id' => $shoe->id,
+                        'name' => $shoe->shoe_name,
+                        'category' => $shoe->brand?->brand_name ?? 'Shoes',
+                        'price' => $shoe->shoe_price,
+                        'image_url' => $image?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image',
+                    ],
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'items' => $items
+        ]);
     }
 }

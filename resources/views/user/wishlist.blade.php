@@ -13,18 +13,18 @@
             <p class="text-stone-500">Keep track of the sneakers you love.</p>
         </div>
         <div class="bg-stone-100 text-stone-600 py-2 px-5 rounded-full text-sm font-bold shadow-inner">
-            {{ $wishlistItems->count() }} Items Saved
+            <span id="wishlist-count">{{ $wishlistItems->count() }}</span> Items Saved
         </div>
     </header>
 
     <!-- Wishlist Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+    <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         
         @forelse($wishlistItems as $item)
-            <div class="bg-white rounded-3xl p-5 border border-stone-100 shadow-sm relative group hover:translate-y-[-8px] transition-all duration-300">
+            <div class="wishlist-item bg-white rounded-3xl p-5 border border-stone-100 shadow-sm relative group hover:-translate-y-2 transition-all duration-300" data-shoe-id="{{ $item->product->id }}">
                 
                 <!-- Remove from Wishlist Button -->
-                <button type="button" class="absolute top-8 right-8 z-10 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 hover:scale-110 shadow-sm transition-all" title="Remove from wishlist">
+                <button type="button" class="remove-wishlist-btn absolute top-8 right-8 z-10 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 hover:scale-110 shadow-sm transition-all" title="Remove from wishlist">
                     <i class="fas fa-trash-alt text-sm"></i>
                 </button>
 
@@ -41,7 +41,7 @@
                             {{ $item->product->name }}
                         </a>
                     </div>
-                    <span class="font-bold text-stone-800 text-lg">${{ number_format($item->product->price, 2) }}</span>
+                    <span class="font-bold text-stone-800 text-lg">RM{{ number_format($item->product->price, 2) }}</span>
                 </div>
 
                 <!-- Add to Cart Action -->
@@ -71,4 +71,59 @@
 
     </div>
 </div>
+</div>
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle remove from wishlist
+        document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const item = this.closest('.wishlist-item');
+                const shoeId = item.getAttribute('data-shoe-id');
+
+                try {
+                    const response = await fetch(`/wishlist/remove/${shoeId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Remove item with animation
+                        item.style.opacity = '0';
+                        item.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            item.remove();
+                            
+                            // Update count
+                            const countSpan = document.getElementById('wishlist-count');
+                            const newCount = data.wishlist_count;
+                            countSpan.textContent = newCount;
+
+                            // Check if wishlist is now empty
+                            const grid = document.getElementById('wishlist-grid');
+                            if (grid.children.length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                    }
+                } catch (error) {
+                    console.error('Error removing from wishlist:', error);
+                }
+            });
+        });
+    });
+</script>
+@endsection
+
 @endsection
