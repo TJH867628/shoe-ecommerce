@@ -205,12 +205,12 @@ class DatabaseSeeder extends Seeder
         }
 
         DB::table('shoe_options')->updateOrInsert(
-            ['shoe_id' => $airMax->id, 'option_values' => 'Size, Color'],
+            ['shoe_id' => $airMax->id, 'option_name' => 'Size, Color'],
             ['created_at' => now(), 'updated_at' => now()]
         );
 
         DB::table('shoe_options')->updateOrInsert(
-            ['shoe_id' => $ultraboost->id, 'option_values' => 'Size, Color'],
+            ['shoe_id' => $ultraboost->id, 'option_name' => 'Size, Color'],
             ['created_at' => now(), 'updated_at' => now()]
         );
 
