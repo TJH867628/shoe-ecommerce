@@ -19,7 +19,6 @@
 					</p>
 					<div class="mt-8 flex flex-wrap gap-3">
 						<a href="{{ route('product') }}" class="px-6 py-3 rounded-full bg-white text-slate-900 font-bold hover:bg-slate-100 transition">Explore Products</a>
-						<a href="{{ route('wishlist') }}" class="px-6 py-3 rounded-full border border-slate-600 text-white font-semibold hover:bg-white/10 transition">See Wishlist</a>
 					</div>
 				</div>
 				<div class="grid grid-cols-2 gap-4">

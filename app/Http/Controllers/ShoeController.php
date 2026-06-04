@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Shoe;
 use App\Models\ShoeVariations;
-use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use App\Services\Builders\Builders\AdminShoeBuilder;
 use App\Services\Builders\Builders\AdminShoeSkuBuilder;
@@ -33,85 +32,86 @@ class ShoeController extends Controller
 
         $sizes = ShoeVariations::query()
             ->get()
-            ->map(fn (ShoeVariations $variation) => data_get($variation->attributes, 'size'))
+            ->map(fn(ShoeVariations $variation) => data_get($variation->attributes, 'size'))
             ->filter()
             ->unique()
             ->sort()
             ->values();
 
-        return view('user.product', compact('sampleProducts', 'brands', 'sizes'));
-    }
+        $priceMin = (float) $shoes->min('shoe_price');
+        $priceMax = (float) $shoes->max('shoe_price');
 
-    public function wishlist()
-    {
-        $user = Auth::user();
-        
-        if (!$user) {
-            $wishlistItems = collect();
-        } else {
-            $wishlistItems = Wishlist::where('user_id', $user->id)
-                ->with(['shoe' => function($query) {
-                    $query->with(['brand', 'images']);
-                }])
-                ->get()
-                ->map(function (Wishlist $wishlist) {
-                    $shoe = $wishlist->shoe;
-                    $image = $shoe->images->firstWhere('is_cover', true)
-                        ?? $shoe->images->sortBy('sort_order')->first();
-
-                    return (object) [
-                        'id' => $wishlist->id,
-                        'product' => (object) [
-                            'id' => $shoe->id,
-                            'name' => $shoe->shoe_name,
-                            'category' => $shoe->brand?->brand_name ?? 'Shoes',
-                            'price' => $shoe->shoe_price,
-                            'image_url' => $image?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image',
-                        ],
-                    ];
-                });
+        if ($shoes->isEmpty()) {
+            $priceMin = 0;
+            $priceMax = 0;
         }
 
-        return view('user.wishlist', compact('wishlistItems'));
+        return view('user.product', compact('sampleProducts', 'brands', 'sizes', 'priceMin', 'priceMax'));
     }
 
     public function show(int $shoeId)
     {
         $shoe = Shoe::with([
             'brand',
-            'variations',
+            'variations.images',
             'options',
             'images',
         ])->findOrFail($shoeId);
 
-        $sizes = $shoe->variations
-            ->map(function ($variation) {
-                return data_get($variation->attributes, 'size');
-            })
-            ->filter()
-            ->unique()
-            ->values();
+        $options = [];
 
-        $colors = $shoe->variations
-            ->map(function ($variation) {
-                return data_get($variation->attributes, 'color');
-            })
-            ->filter()
-            ->unique()
-            ->values();
+        foreach ($shoe->variations as $variation) {
+
+            foreach (($variation->attributes ?? []) as $name => $value) {
+
+                if (!isset($options[$name])) {
+                    $options[$name] = [];
+                }
+
+                $options[$name][] = $value;
+            }
+        }
+
+        foreach ($options as $name => $values) {
+            $options[$name] = collect($values)
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray();
+        }
 
         $variationMatrix = $shoe->variations
             ->map(function ($variation) {
+
                 return [
+                    'id' => $variation->id,
                     'sku_code' => $variation->sku_code,
-                    'size' => data_get($variation->attributes, 'size'),
-                    'color' => data_get($variation->attributes, 'color'),
                     'stock_quantity' => (int) $variation->stock_quantity,
+                    'attributes' => $variation->attributes ?? [],
+                    'images' => $variation->images
+                        ->map(function ($image) {
+
+                            return str_starts_with(
+                                $image->image_path,
+                                'http'
+                            )
+                                ? $image->image_path
+                                : asset('storage/' . $image->image_path);
+
+                        })
+                        ->values(),
                 ];
             })
             ->values();
 
-        return view('user.product-details', compact('shoe', 'sizes', 'colors', 'variationMatrix'));
+        return view(
+            'user.product-details',
+            compact(
+                'shoe',
+                'options',
+                'variationMatrix'
+            )
+        );
     }
 
     public function getAllShoes()
@@ -127,24 +127,6 @@ class ShoeController extends Controller
     public function getShoesByBrand($brandId)
     {
         return Shoe::with('variations', 'brand')->where('brand_id', $brandId)->get();
-    }
-
-    public function showAdminTestPage(int $shoeId)
-    {
-        $shoe = Shoe::with([
-            'brand',
-            'options',
-            'images',
-            'variations',
-            'variations.images'
-        ])->findOrFail($shoeId);
-
-        $brands = \App\Models\Brand::all();
-
-        return view(
-            'admin.product',
-            compact('shoe', 'brands')
-        );
     }
 
     public function searchShoes(Request $request)
@@ -188,6 +170,17 @@ class ShoeController extends Controller
 
     public function uploadShoeImages(Request $request, int $shoeId)
     {
+        $request->validate([
+            'images' => ['required', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ], [
+            'images.required' => 'Please select at least one product image.',
+            'images.max' => 'Please upload no more than 10 product images at once.',
+            'images.*.image' => 'Each uploaded file must be an image.',
+            'images.*.mimes' => 'Images must be JPG, JPEG, PNG, or WEBP files.',
+            'images.*.max' => 'Each image must be 4 MB or smaller.',
+        ]);
+
         $shoe = Shoe::findOrFail($shoeId);
 
         if ($request->hasFile('images')) {
@@ -237,6 +230,17 @@ class ShoeController extends Controller
 
     public function uploadVariationImages(Request $request, int $variationId)
     {
+        $request->validate([
+            'images' => ['required', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ], [
+            'images.required' => 'Please select at least one variation image.',
+            'images.max' => 'Please upload no more than 10 variation images at once.',
+            'images.*.image' => 'Each uploaded file must be an image.',
+            'images.*.mimes' => 'Images must be JPG, JPEG, PNG, or WEBP files.',
+            'images.*.max' => 'Each image must be 4 MB or smaller.',
+        ]);
+
         $variation = ShoeVariations::findOrFail($variationId);
 
         if ($request->hasFile('images')) {
@@ -306,7 +310,7 @@ class ShoeController extends Controller
             'name' => $shoe->shoe_name,
             'brand' => $shoe->brand?->brand_name ?? 'Unknown',
             'price' => $shoe->shoe_price,
-            'image' => $coverImage?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image',
+            'image' => $coverImage?->image_path ?? null,
             'stock' => (int) $shoe->variations->sum('stock_quantity'),
             'variation_id' => $firstVariation?->id,
             'sizes' => $sizes,
@@ -478,96 +482,5 @@ class ShoeController extends Controller
         $variation->delete();
 
         return back()->with('success', 'Variation deleted successfully.');
-    }
-
-    public function addToWishlist(int $shoeId)
-    {
-        $user = Auth::user();
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please login to add items to wishlist'
-            ], 401);
-        }
-
-        // Check if shoe exists
-        $shoe = Shoe::findOrFail($shoeId);
-
-        // Create or ignore if already exists (due to unique constraint)
-        \App\Models\Wishlist::firstOrCreate(
-            ['user_id' => $user->id, 'shoe_id' => $shoeId]
-        );
-
-        $wishlistCount = \App\Models\Wishlist::where('user_id', $user->id)->count();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Item added to wishlist',
-            'wishlist_count' => $wishlistCount
-        ]);
-    }
-
-    public function removeFromWishlist(int $shoeId)
-    {
-        $user = Auth::user();
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please login to remove items from wishlist'
-            ], 401);
-        }
-
-        \App\Models\Wishlist::where('user_id', $user->id)
-            ->where('shoe_id', $shoeId)
-            ->delete();
-
-        $wishlistCount = \App\Models\Wishlist::where('user_id', $user->id)->count();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Item removed from wishlist',
-            'wishlist_count' => $wishlistCount
-        ]);
-    }
-
-    public function getWishlistItems()
-    {
-        $user = Auth::user();
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'items' => []
-            ]);
-        }
-
-        $items = Wishlist::where('user_id', $user->id)
-            ->with(['shoe' => function($query) {
-                $query->with(['brand', 'images']);
-            }])
-            ->get()
-            ->map(function (Wishlist $wishlist) {
-                $shoe = $wishlist->shoe;
-                $image = $shoe->images->firstWhere('is_cover', true)
-                    ?? $shoe->images->sortBy('sort_order')->first();
-
-                return (object) [
-                    'id' => $wishlist->id,
-                    'product' => (object) [
-                        'id' => $shoe->id,
-                        'name' => $shoe->shoe_name,
-                        'category' => $shoe->brand?->brand_name ?? 'Shoes',
-                        'price' => $shoe->shoe_price,
-                        'image_url' => $image?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image',
-                    ],
-                ];
-            });
-
-        return response()->json([
-            'success' => true,
-            'items' => $items
-        ]);
     }
 }

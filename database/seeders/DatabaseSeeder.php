@@ -9,280 +9,230 @@ use App\Models\Shoe;
 use App\Models\ShoeVariations;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Carbon;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $user = User::firstOrNew(['email' => 'test@example.com']);
-        $user->forceFill([
-            'name' => 'Test User',
-            'password' => Hash::make('password'),
-            'role' => 'customer',
-            'phone' => '0123456789',
-        ])->save();
+        $now = now();
 
-        $admin = User::firstOrNew(['email' => 'admin@example.com']);
-        $admin->forceFill([
-            'name' => 'Admin User',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'phone' => '0999999999',
-        ])->save();
-
-        $nike = Brand::updateOrCreate(
-            ['brand_name' => 'Nike'],
-            ['brand_description' => 'Performance footwear and sportswear brand.']
-        );
-
-        $adidas = Brand::updateOrCreate(
-            ['brand_name' => 'Adidas'],
-            ['brand_description' => 'Athletic shoes with everyday comfort and style.']
-        );
-
-        $puma = Brand::updateOrCreate(
-            ['brand_name' => 'Puma'],
-            ['brand_description' => 'Lifestyle and performance shoes for everyday wear.']
-        );
-
-        $newBalance = Brand::updateOrCreate(
-            ['brand_name' => 'New Balance'],
-            ['brand_description' => 'Comfort-first shoes with classic styling.']
-        );
-
-        $airMax = Shoe::updateOrCreate(
-            ['shoe_name' => 'Air Max Runner'],
+        $customer = User::updateOrCreate(
+            ['email' => 'test@example.com'],
             [
-                'brand_id' => $nike->id,
-                'shoe_description' => 'Lightweight running shoe with responsive cushioning.',
-                'shoe_price' => 499.00,
+                'name' => 'Test User',
+                'password' => Hash::make('password'),
+                'role' => 'customer',
+                'phone' => '0123456789',
             ]
         );
 
-        $ultraboost = Shoe::updateOrCreate(
-            ['shoe_name' => 'Ultraboost Street'],
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
             [
-                'brand_id' => $adidas->id,
-                'shoe_description' => 'Comfort-focused sneaker for daily wear and training.',
-                'shoe_price' => 579.00,
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'phone' => '0999999999',
             ]
         );
 
-        $rsx = Shoe::updateOrCreate(
-            ['shoe_name' => 'RS-X Games'],
-            [
-                'brand_id' => $puma->id,
-                'shoe_description' => 'Chunky retro-inspired sneaker with bold cushioning.',
-                'shoe_price' => 399.00,
-            ]
-        );
+        $brands = [
+            'Nike' => 'Performance footwear and sportswear for training, running, and everyday wear.',
+            'Adidas' => 'Athletic and lifestyle shoes built for comfort, movement, and daily style.',
+            'Puma' => 'Street-ready sneakers with sporty silhouettes and bold designs.',
+            'New Balance' => 'Comfort-first shoes with classic profiles and dependable support.',
+            'Asics' => 'Running-focused footwear with stable cushioning and lightweight builds.',
+        ];
 
-        $nb990 = Shoe::updateOrCreate(
-            ['shoe_name' => '990v6'],
-            [
-                'brand_id' => $newBalance->id,
-                'shoe_description' => 'Premium everyday trainer with exceptional comfort.',
-                'shoe_price' => 699.00,
-            ]
-        );
+        $brandModels = [];
+        foreach ($brands as $name => $description) {
+            $brandModels[$name] = Brand::updateOrCreate(
+                ['brand_name' => $name],
+                ['brand_description' => $description]
+            );
+        }
 
-        $airMaxBlue = ShoeVariations::updateOrCreate(
+        $shoeCatalog = [
             [
-                'shoe_id' => $airMax->id,
-                'attributes' => ['size' => 42, 'color' => 'Blue'],
-            ],
-            [
-                'stock_quantity' => 12,
-                'sku_code' => 'AMR-42-BLUE',
-            ]
-        );
-
-        ShoeVariations::updateOrCreate(
-            [
-                'shoe_id' => $airMax->id,
-                'attributes' => ['size' => 43, 'color' => 'Black'],
-            ],
-            [
-                'stock_quantity' => 8,
-                'sku_code' => 'AMR-43-BLK',
-            ]
-        );
-
-        ShoeVariations::updateOrCreate(
-            [
-                'shoe_id' => $ultraboost->id,
-                'attributes' => ['size' => 41, 'color' => 'White'],
-            ],
-            [
-                'stock_quantity' => 15,
-                'sku_code' => 'UBS-41-WHT',
-            ]
-        );
-
-        ShoeVariations::updateOrCreate(
-            [
-                'shoe_id' => $rsx->id,
-                'attributes' => ['size' => 42, 'color' => 'Red'],
-            ],
-            [
-                'stock_quantity' => 10,
-                'sku_code' => 'RSX-42-RED',
-            ]
-        );
-
-        ShoeVariations::updateOrCreate(
-            [
-                'shoe_id' => $nb990->id,
-                'attributes' => ['size' => 43, 'color' => 'Grey'],
-            ],
-            [
-                'stock_quantity' => 6,
-                'sku_code' => 'NB990-43-GRY',
-            ]
-        );
-
-        $shoeSeeds = [
-            [
-                'shoe' => $airMax,
+                'name' => 'Air Max Runner',
+                'brand' => 'Nike',
+                'price' => 499.00,
+                'description' => 'Lightweight runner with responsive cushioning for daily training and long walks.',
                 'images' => [
-                    ['image_path' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80', 'is_cover' => true, 'sort_order' => 1],
-                    ['image_path' => 'https://images.unsplash.com/photo-1528701800489-47645c2a34f2?auto=format&fit=crop&w=1200&q=80', 'is_cover' => false, 'sort_order' => 2],
+                    ['url' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                    ['url' => 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1200&q=80', 'cover' => false],
+                ],
+                'variations' => [
+                    ['attributes' => ['size' => 40, 'color' => 'Black'], 'stock' => 14, 'sku' => 'AMR-40-BLK'],
+                    ['attributes' => ['size' => 41, 'color' => 'Black'], 'stock' => 11, 'sku' => 'AMR-41-BLK'],
+                    ['attributes' => ['size' => 42, 'color' => 'Blue'], 'stock' => 8, 'sku' => 'AMR-42-BLU'],
+                    ['attributes' => ['size' => 43, 'color' => 'White'], 'stock' => 5, 'sku' => 'AMR-43-WHT'],
                 ],
             ],
             [
-                'shoe' => $ultraboost,
+                'name' => 'Ultraboost Street',
+                'brand' => 'Adidas',
+                'price' => 579.00,
+                'description' => 'Comfort-focused sneaker for everyday wear, commute days, and light workouts.',
                 'images' => [
-                    ['image_path' => 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdbd62?auto=format&fit=crop&w=1200&q=80', 'is_cover' => true, 'sort_order' => 1],
+                    ['url' => 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdbd62?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                    ['url' => 'https://images.unsplash.com/photo-1608379743498-0f3a9d7b9f28?auto=format&fit=crop&w=1200&q=80', 'cover' => false],
+                ],
+                'variations' => [
+                    ['attributes' => ['size' => 40, 'color' => 'White'], 'stock' => 10, 'sku' => 'UBS-40-WHT'],
+                    ['attributes' => ['size' => 41, 'color' => 'White'], 'stock' => 12, 'sku' => 'UBS-41-WHT'],
+                    ['attributes' => ['size' => 42, 'color' => 'Grey'], 'stock' => 9, 'sku' => 'UBS-42-GRY'],
+                    ['attributes' => ['size' => 43, 'color' => 'Black'], 'stock' => 6, 'sku' => 'UBS-43-BLK'],
                 ],
             ],
             [
-                'shoe' => $rsx,
+                'name' => 'RS-X Games',
+                'brand' => 'Puma',
+                'price' => 399.00,
+                'description' => 'Chunky retro-inspired sneaker with bold cushioning and a streetwear edge.',
                 'images' => [
-                    ['image_path' => 'https://images.unsplash.com/photo-1542293787938-c9e299b880f4?auto=format&fit=crop&w=1200&q=80', 'is_cover' => true, 'sort_order' => 1],
+                    ['url' => 'https://images.unsplash.com/photo-1542293787938-c9e299b880f4?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                ],
+                'variations' => [
+                    ['attributes' => ['size' => 39, 'color' => 'Red'], 'stock' => 7, 'sku' => 'RSX-39-RED'],
+                    ['attributes' => ['size' => 40, 'color' => 'Red'], 'stock' => 8, 'sku' => 'RSX-40-RED'],
+                    ['attributes' => ['size' => 41, 'color' => 'Black'], 'stock' => 9, 'sku' => 'RSX-41-BLK'],
+                    ['attributes' => ['size' => 42, 'color' => 'Grey'], 'stock' => 6, 'sku' => 'RSX-42-GRY'],
                 ],
             ],
             [
-                'shoe' => $nb990,
+                'name' => '990v6',
+                'brand' => 'New Balance',
+                'price' => 699.00,
+                'description' => 'Premium everyday trainer with elevated comfort and a classic running aesthetic.',
                 'images' => [
-                    ['image_path' => 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=1200&q=80', 'is_cover' => true, 'sort_order' => 1],
+                    ['url' => 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                ],
+                'variations' => [
+                    ['attributes' => ['size' => 40, 'color' => 'Grey'], 'stock' => 4, 'sku' => 'NB990-40-GRY'],
+                    ['attributes' => ['size' => 41, 'color' => 'Grey'], 'stock' => 6, 'sku' => 'NB990-41-GRY'],
+                    ['attributes' => ['size' => 42, 'color' => 'Blue'], 'stock' => 5, 'sku' => 'NB990-42-BLU'],
+                    ['attributes' => ['size' => 43, 'color' => 'Black'], 'stock' => 3, 'sku' => 'NB990-43-BLK'],
+                ],
+            ],
+            [
+                'name' => 'Gel Pulse',
+                'brand' => 'Asics',
+                'price' => 459.00,
+                'description' => 'Neutral running shoe with reliable shock absorption and lightweight support.',
+                'images' => [
+                    ['url' => 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                ],
+                'variations' => [
+                    ['attributes' => ['size' => 40, 'color' => 'Blue'], 'stock' => 11, 'sku' => 'GEL-40-BLU'],
+                    ['attributes' => ['size' => 41, 'color' => 'Black'], 'stock' => 10, 'sku' => 'GEL-41-BLK'],
+                    ['attributes' => ['size' => 42, 'color' => 'White'], 'stock' => 7, 'sku' => 'GEL-42-WHT'],
+                    ['attributes' => ['size' => 43, 'color' => 'Red'], 'stock' => 5, 'sku' => 'GEL-43-RED'],
                 ],
             ],
         ];
 
-        foreach ($shoeSeeds as $shoeSeed) {
-            foreach ($shoeSeed['images'] as $image) {
-                DB::table('shoe_images')->updateOrInsert(
+        $primaryVariations = [];
+
+        foreach ($shoeCatalog as $shoeSeed) {
+            $shoe = Shoe::updateOrCreate(
+                [
+                    'shoe_name' => $shoeSeed['name'],
+                    'brand_id' => $brandModels[$shoeSeed['brand']]->id,
+                ],
+                [
+                    'shoe_description' => $shoeSeed['description'],
+                    'shoe_price' => $shoeSeed['price'],
+                ]
+            );
+            DB::table('shoe_images')->where('shoe_id', $shoe->id)->delete();
+            foreach ($shoeSeed['images'] as $index => $image) {
+                DB::table('shoe_images')->insert([
+                    'shoe_id' => $shoe->id,
+                    'image_path' => $image['url'],
+                    'is_cover' => $image['cover'],
+                    'sort_order' => $index + 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+
+            DB::table('shoe_options')->updateOrInsert(
+                ['shoe_id' => $shoe->id],
+                ['option_name' => 'Size, Color', 'updated_at' => $now, 'created_at' => $now]
+            );
+
+            foreach ($shoeSeed['variations'] as $variationSeed) {
+                $variation = ShoeVariations::updateOrCreate(
                     [
-                        'shoe_id' => $shoeSeed['shoe']->id,
-                        'image_path' => $image['image_path'],
+                        'shoe_id' => $shoe->id,
+                        'attributes' => $variationSeed['attributes'],
                     ],
                     [
-                        'is_cover' => $image['is_cover'],
-                        'sort_order' => $image['sort_order'],
-                        'updated_at' => now(),
-                        'created_at' => now(),
+                        'stock_quantity' => $variationSeed['stock'],
+                        'sku_code' => $variationSeed['sku'],
                     ]
                 );
+
+                $primaryVariations[] = $variation;
+
+                DB::table('shoe_variation_images')->where('shoe_variation_id', $variation->id)->delete();
+                DB::table('shoe_variation_images')->insert([
+                    'shoe_variation_id' => $variation->id,
+                    'image_path' => $shoeSeed['images'][0]['url'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
             }
         }
 
-        $variationImages = ShoeVariations::query()->get()->all();
-        foreach ($variationImages as $variation) {
-            DB::table('shoe_variation_images')->updateOrInsert(
-                [
-                    'shoe_variation_id' => $variation->id,
-                    'image_path' => 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1200&q=80',
-                ],
-                [
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
-        }
-
-        DB::table('shoe_options')->updateOrInsert(
-            ['shoe_id' => $airMax->id, 'option_name' => 'Size, Color'],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
-
-        DB::table('shoe_options')->updateOrInsert(
-            ['shoe_id' => $ultraboost->id, 'option_name' => 'Size, Color'],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
-
-        $voucher = DB::table('vouchers')->updateOrInsert(
-            ['voucher_code' => 'WELCOME10'],
-            [
-                'discount_value' => 10.00,
-                'expiry_date' => Carbon::now()->addMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-
-        $voucherId = DB::table('vouchers')->where('voucher_code', 'WELCOME10')->value('id');
-
         $cart = Cart::updateOrCreate(
-            ['user_id' => $user->id],
+            ['user_id' => $customer->id],
             []
         );
 
         CartItem::updateOrCreate(
             [
                 'cart_id' => $cart->id,
-                'shoe_variation_id' => $airMaxBlue->id,
+                'shoe_variation_id' => $primaryVariations[0]->id,
             ],
             ['quantity' => 1]
         );
 
-        $orderId = DB::table('orders')->updateOrInsert(
-            [
-                'user_id' => $user->id,
-                'status' => 'pending',
-            ],
-            [
-                'voucher_id' => $voucherId,
-                'total_amount' => 499.00,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-
-        $orderId = DB::table('orders')->where('user_id', $user->id)->latest('id')->value('id');
+        $order = DB::table('orders')->insertGetId([
+            'user_id' => $customer->id,
+            'total_amount' => 499.00,
+            'status' => 'pending',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         DB::table('order_items')->updateOrInsert(
             [
-                'order_id' => $orderId,
-                'shoe_variation_id' => $airMaxBlue->id,
+                'order_id' => $order,
+                'shoe_variation_id' => $primaryVariations[0]->id,
             ],
             [
                 'quantity' => 1,
                 'unit_price' => 499.00,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ]
         );
 
         DB::table('payments')->updateOrInsert(
-            [
-                'order_id' => $orderId,
-                'payment_method' => 'ToyyibPay',
-            ],
+            ['order_id' => $order],
             [
                 'payment_amount' => 499.00,
                 'payment_status' => 'pending',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'payment_method' => 'ToyyibPay',
+                'created_at' => $now,
+                'updated_at' => $now,
             ]
         );
     }

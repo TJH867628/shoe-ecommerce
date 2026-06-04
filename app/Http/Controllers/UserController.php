@@ -125,10 +125,11 @@ class UserController extends Controller
             return redirect()->route('login')->with('error', 'Please log in to view your profile.');
         }
 
-        $orders = Order::with(['items.variation.shoe.brand'])
+        $orders = Order::with(['items.variation.shoe.brand','payment'])
             ->where('user_id', $user->id)
             ->orderByDesc('created_at')
             ->get();
+            
 
         return view('user.profile', compact('user', 'orders'));
     }

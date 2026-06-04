@@ -15,7 +15,6 @@ use App\Models\Brand;
 use App\Models\Order;
 use App\Models\Shoe;
 use App\Models\User;
-use App\Models\Wishlist;
 /*
 GET
 */
@@ -31,8 +30,6 @@ Route::get('register', [UserController::class, 'registerPage'])->name('register'
 Route::get('login', [UserController::class, 'loginPage'])->name('login');
 Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');
 Route::get('/user/product', [ShoeController::class, 'index'])->name('product');
-Route::get('/user/wishlist', [ShoeController::class, 'wishlist'])->name('wishlist');
-Route::get('/wishlist/items', [ShoeController::class, 'getWishlistItems'])->name('wishlist.items');
 Route::get('/user/cart', [CartController::class, 'show'])->name('cart.index');
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
@@ -47,7 +44,6 @@ Route::middleware(['auth', 'admin'])
                 ['label' => 'Brands', 'value' => Brand::count(), 'note' => 'Active catalog brands'],
                 ['label' => 'Shoes', 'value' => Shoe::count(), 'note' => 'Products in catalog'],
                 ['label' => 'Orders', 'value' => Order::count(), 'note' => 'Placed purchases'],
-                ['label' => 'Wishlist Items', 'value' => Wishlist::count(), 'note' => 'Saved products'],
             ];
 
             $recentShoes = Shoe::with('brand')
@@ -88,7 +84,6 @@ Route::middleware(['auth', 'admin'])
                 'variations',
                 'variations.images',
             ])->findOrFail($shoeId);
-
             $brands = Brand::orderBy('brand_name')->get();
 
             return view('admin.product', compact('shoe', 'brands'));
@@ -160,36 +155,9 @@ Route::get('/shoes/search', [ShoeController::class, 'searchShoes']);
 Route::get('/shoes/brand/{brandId}', [ShoeController::class, 'getShoesByBrand']);
 Route::get('/shoes/{shoeId}/options', [ShoeController::class, 'getShoeOptions']);
 Route::get('/shoes/{id}', [ShoeController::class, 'getShoeById']);
-Route::get('/test-product/{shoeId}', function (int $shoeId) {
-    return redirect()->route('admin.shoes.show', $shoeId);
-})->name('test-product');
-Route::get('/prototype-test/{shoe}', function (\App\Models\Shoe $shoe) {
-    return view('prototype-test', compact('shoe'));
-});
-Route::get('/test-manage-shoes', function () {
-    return redirect()->route('admin.shoes.index');
-});
-Route::get('/payment/toyyibpay/return', function (Request $request) {
-    $statusId = (string) $request->query('status_id');
-
-    $message = match ($statusId) {
-        '1' => 'ToyyibPay payment completed successfully.',
-        '2' => 'ToyyibPay payment is still pending.',
-        '3' => 'ToyyibPay payment failed.',
-        default => 'Returned from ToyyibPay without a payment status.',
-    };
-
-    $flashKey = $statusId === '3' ? 'failed' : 'success';
-
-    return redirect()
-        ->route('user.payment')
-        ->with($flashKey, $message)
-        ->with('checkout_result', [
-            'status_id' => $statusId,
-            'billcode' => $request->query('billcode'),
-            'order_id' => $request->query('order_id'),
-        ]);
-})->name('toyyibpay.return');
+Route::get('/payment/toyyibpay/return', [PaymentController::class, 'toyyibpayReturn'])->name('toyyibpay.return');
+Route::get('/payment/toyyibpay/callback', [PaymentController::class, 'toyyibpayCallback'])->name('toyyibpay.callback');
+Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('user.payment-success');
 
 /*
 POST
@@ -206,11 +174,6 @@ Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add')
 Route::patch('/cart/{item}/quantity', [CartController::class, 'updateQuantity'])->name('cart.update-quantity');
 Route::post('shoes/{shoeId}/clone', [ShoePrototypeController::class, 'clone'])->name('shoes.clone');
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
-Route::post('/payment/toyyibpay/callback', function () {
-    return response()->json(['status' => 'ok']);
-})->name('toyyibpay.callback');
-Route::post('/wishlist/add/{shoeId}', [ShoeController::class, 'addToWishlist'])->name('wishlist.add');
-Route::post('/wishlist/remove/{shoeId}', [ShoeController::class, 'removeFromWishlist'])->name('wishlist.remove');
 
 /*
 PUT
@@ -233,7 +196,6 @@ Route::delete('/cart', [CartController::class, 'clearCart'])->name('cart.clear')
 VIEW
 */
 Route::view('/about', 'user.about')->name('about');
-Route::view('/test-create-shoes', 'test-create-shoes')->name('test-create-shoes');
 Route::middleware('auth')->get('/user/payment', function (Request $request) {
     $user = $request->user();
 

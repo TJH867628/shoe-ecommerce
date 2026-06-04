@@ -13,7 +13,6 @@
         <div class="hidden md:flex items-center gap-8">
             <a href="{{ url('/') }}" class="text-sm font-bold {{ request()->is('/') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">Home</a>
             <a href="{{ url('/user/product') }}" class="text-sm font-bold {{ request()->is('user/product*') || request()->is('user/products/*') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">Product</a>
-            <a href="{{ url('/user/wishlist') }}" class="text-sm font-bold {{ request()->is('user/wishlist') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">Wishlist</a>
             <a href="{{ url('/about') }}" class="text-sm font-bold {{ request()->is('about') ? 'text-slate-900' : 'text-slate-400 hover:text-slate-900' }} transition-colors">About</a>
         </div>
 
@@ -74,7 +73,6 @@
     <div id="mobileMenu" class="hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 py-4 px-6 shadow-xl flex-col gap-4">
         <a href="{{ url('/') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Home</a>
         <a href="{{ url('/user/product') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Product</a>
-        <a href="{{ url('/user/wishlist') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Wishlist</a>
         <a href="{{ route('cart.index') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">Cart</a>
         <a href="{{ url('/about') }}" class="text-left text-xl font-black text-slate-900 py-2 border-b border-slate-50">About</a>
 

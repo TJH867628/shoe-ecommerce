@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Brand;   
+use App\Models\Brand;
 
 class BrandController extends Controller
 {
@@ -52,7 +52,14 @@ class BrandController extends Controller
 
     public function deleteBrand(int $brandId)
     {
-        $brand = Brand::findOrFail($brandId);
+        $brand = Brand::withCount('shoes')->findOrFail($brandId);
+
+        if ($brand->shoes_count > 0) {
+            return redirect()->back()->with(
+                'error',
+                'Unable to delete this brand because it is currently used by one or more shoes.'
+            );
+        }
 
         $brand->delete();
 

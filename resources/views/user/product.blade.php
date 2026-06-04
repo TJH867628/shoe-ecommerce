@@ -6,7 +6,7 @@
 <div class="min-h-screen bg-slate-50">
 
     <!-- Header Section -->
-    <div class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="bg-white border-b border-slate-200 sticky top-0 z-1">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -47,15 +47,27 @@
                     <!-- Price Range -->
                     <div class="border-t pt-6">
                         <label class="block text-sm font-bold text-slate-900 mb-3">Price Range</label>
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <input type="range" id="priceMin" min="0" max="500" value="0"
-                                    class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer">
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+                                    <span>Min</span>
+                                    <span id="priceMinDisplay">{{ number_format($priceMin ?? 0, 0) }}</span>
+                                </div>
+                                <input type="range" id="priceMin" min="{{ $priceMin ?? 0 }}" max="{{ $priceMax ?? 0 }}" value="{{ $priceMin ?? 0 }}"
+                                    class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+                                    <span>Max</span>
+                                    <span id="priceMaxDisplay">Unlimited</span>
+                                </div>
+                                <input type="range" id="priceMax" min="{{ $priceMin ?? 0 }}" max="{{ $priceMax ?? 0 }}" value="{{ $priceMax ?? 0 }}"
+                                    class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer">
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-semibold text-slate-900">$<span id="priceDisplay">0</span></span>
+                                <span class="text-sm font-semibold text-slate-900">$<span id="priceMinValue">{{ number_format($priceMin ?? 0, 0) }}</span></span>
                                 <span class="text-slate-400">-</span>
-                                <span class="text-sm font-semibold text-slate-900">$500+</span>
+                                <span class="text-sm font-semibold text-slate-900">$<span id="priceMaxValue">Unlimited</span></span>
                             </div>
                         </div>
                     </div>
@@ -78,7 +90,7 @@
                         <label class="block text-sm font-bold text-slate-900 mb-3">Size</label>
                         <div class="grid grid-cols-3 gap-2">
                             @foreach($sizes as $size)
-                            <button class="size-filter-btn p-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition">
+                            <button type="button" class="size-filter-btn p-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition">
                                 {{ $size }}
                             </button>
                             @endforeach
@@ -129,11 +141,9 @@
                     <div class="flex items-center gap-2">
                         <label class="text-sm font-semibold text-slate-700">Sort by:</label>
                         <select id="sortSelect" class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition">
-                            <option value="newest">Newest</option>
+                            <option value="newest">Latest</option>
                             <option value="price-low">Price: Low to High</option>
                             <option value="price-high">Price: High to Low</option>
-                            <option value="popularity">Most Popular</option>
-                            <option value="rating">Highest Rated</option>
                         </select>
                     </div>
 
@@ -154,28 +164,29 @@
                 <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                     @foreach($sampleProducts as $product)
-                    <div class="product-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition group" data-product-id="{{ $product['id'] }}">
+                    <a href="{{ route('products.show', ['shoeId' => $product['id']]) }}" class="product-card block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition group" data-product-id="{{ $product['id'] }}">
 
                         <!-- Image Container -->
                         <div class="relative overflow-hidden bg-slate-100 aspect-square">
-                            <img src="{{ $product['image'] }}"
+                            @if($product['image'])
+                            <img src="{{ str_starts_with($product['image'], 'http') ? $product['image'] : asset('storage/' . $product['image']) }}"
                                 alt="{{ $product['name'] }}"
                                 class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                            @else
+                            <div class="w-full h-full flex items-center justify-center text-slate-500">
+                                No Image
+                            </div>
+                            @endif
 
                             <!-- Discount Badge -->
                             <div class="absolute top-3 right-3 bg-slate-900 text-white px-3 py-1 rounded-full text-sm font-bold">
                                 In stock: {{ $product['stock'] }}
                             </div>
 
-                            <!-- Wishlist Button -->
-                            <button type="button" class="wishlist-btn absolute top-3 left-3 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-red-50 transition opacity-0 group-hover:opacity-100 cursor-pointer" data-shoe-id="{{ $product['id'] }}" title="Add to wishlist">
-                                <i class="far fa-heart text-red-500 text-lg"></i>
-                            </button>
-
                             <!-- Quick View Button -->
-                            <a href="{{ route('products.show', ['shoeId' => $product['id']]) }}" class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white font-semibold py-3 translate-y-full group-hover:translate-y-0 transition duration-300 text-center">
+                            <div class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white font-semibold py-3 translate-y-full group-hover:translate-y-0 transition duration-300 text-center">
                                 Quick View
-                            </a>
+                            </div>
                         </div>
 
                         <!-- Product Info -->
@@ -189,27 +200,8 @@
                             <div class="flex items-baseline gap-2 mb-4">
                                 <span class="text-lg font-bold text-slate-900">RM{{ number_format($product['price'], 2) }}</span>
                             </div>
-
-                            <!-- Add to Cart Button -->
-                            @if(!empty($product['variation_id']))
-                            <form action="{{ route('cart.add') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="shoe_id" value="{{ $product['id'] }}">
-                                <input type="hidden" name="variation_id" value="{{ $product['variation_id'] }}">
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-shopping-cart text-sm"></i>
-                                    Add to Cart
-                                </button>
-                            </form>
-                            @else
-                            <button type="button" disabled class="w-full bg-slate-300 text-slate-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
-                                <i class="fas fa-shopping-cart text-sm"></i>
-                                Add to Cart
-                            </button>
-                            @endif
                         </div>
-                    </div>
+                    </a>
                     @endforeach
 
                 </div>
@@ -286,107 +278,53 @@
 </style>
 
 <script>
-    // Wishlist Management
-    let wishlistState = new Set();
-
-    // Expose products for client-side filtering and pagination
-    window.__products = {
-        !!json_encode($sampleProducts) !!
-    };
-
-    // Load wishlist state from session
-    async function initializeWishlist() {
-        try {
-            const response = await fetch('{{ route("wishlist.items") }}');
-            const data = await response.json();
-            if (data.success) {
-                data.items.forEach(item => {
-                    wishlistState.add(item.product.id);
-                });
-                updateWishlistUI();
-            }
-        } catch (error) {
-            console.error('Error loading wishlist:', error);
-        }
-    }
-
-    function updateWishlistUI() {
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            const shoeId = parseInt(btn.getAttribute('data-shoe-id'));
-            const icon = btn.querySelector('i');
-
-            if (wishlistState.has(shoeId)) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                btn.title = 'Remove from wishlist';
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                btn.title = 'Add to wishlist';
-            }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize wishlist
-        initializeWishlist();
-
-        // Wishlist button handlers
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            btn.addEventListener('click', async function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const shoeId = parseInt(this.getAttribute('data-shoe-id'));
-                const isInWishlist = wishlistState.has(shoeId);
-                const route = isInWishlist ?
-                    `/wishlist/remove/${shoeId}` :
-                    `/wishlist/add/${shoeId}`;
-
-                try {
-                    const response = await fetch(route, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (response.status === 401) {
-                        alert('Please login to manage your wishlist');
-                        window.location.href = '{{ route("login") }}';
-                        return;
-                    }
-
-                    if (data.success) {
-                        if (isInWishlist) {
-                            wishlistState.delete(shoeId);
-                        } else {
-                            wishlistState.add(shoeId);
-                        }
-                        updateWishlistUI();
-                    } else {
-                        alert(data.message || 'Error updating wishlist');
-                    }
-                } catch (error) {
-                    console.error('Error updating wishlist:', error);
-                    alert('Error updating wishlist');
-                }
-            });
-        });
+    document.addEventListener('DOMContentLoaded', function () {
+        window.__products = @json($sampleProducts);
 
         // Toggle Filters on Mobile
-        document.getElementById('toggleFilters').addEventListener('click', function() {
+        document.getElementById('toggleFilters')?.addEventListener('click', function () {
             const panel = document.getElementById('filtersPanel');
-            panel.classList.toggle('active');
+            panel?.classList.toggle('active');
         });
 
         // Price Slider
-        document.getElementById('priceMin').addEventListener('input', function() {
-            document.getElementById('priceDisplay').textContent = Math.round(this.value);
+        const priceMinInput = document.getElementById('priceMin');
+        const priceMaxInput = document.getElementById('priceMax');
+        const priceMinDisplay = document.getElementById('priceMinDisplay');
+        const priceMaxDisplay = document.getElementById('priceMaxDisplay');
+        const priceMinValue = document.getElementById('priceMinValue');
+        const priceMaxValue = document.getElementById('priceMaxValue');
+        const catalogMaxPrice = {{ (float) ($priceMax ?? 0) }};
+
+        function syncPriceRange() {
+            if (!priceMinInput || !priceMaxInput) return;
+
+            let minValue = parseFloat(priceMinInput.value) || 0;
+            let maxValue = parseFloat(priceMaxInput.value) || 0;
+
+            if (minValue > maxValue) {
+                [minValue, maxValue] = [maxValue, minValue];
+                priceMinInput.value = minValue;
+                priceMaxInput.value = maxValue;
+            }
+
+            if (priceMinDisplay) priceMinDisplay.textContent = Math.round(minValue);
+            if (priceMaxDisplay) {
+                priceMaxDisplay.textContent = maxValue >= catalogMaxPrice ? 'Unlimited' : Math.round(maxValue);
+            }
+            if (priceMinValue) priceMinValue.textContent = Math.round(minValue);
+            if (priceMaxValue) {
+                priceMaxValue.textContent = maxValue >= catalogMaxPrice ? 'Unlimited' : Math.round(maxValue);
+            }
+        }
+
+        priceMinInput?.addEventListener('input', function () {
+            syncPriceRange();
+            filterProducts(1);
+        });
+
+        priceMaxInput?.addEventListener('input', function () {
+            syncPriceRange();
             filterProducts(1);
         });
 
@@ -395,7 +333,7 @@
 
         // Size filter buttons (toggle active)
         document.querySelectorAll('.size-filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 if (this.disabled) return;
                 this.classList.toggle('active');
                 filterProducts(1);
@@ -404,7 +342,7 @@
 
         // Color option toggles
         document.querySelectorAll('.color-filter-btn').forEach(lbl => {
-            lbl.addEventListener('click', function() {
+            lbl.addEventListener('click', function () {
                 if (this.disabled) return;
                 this.classList.toggle('active');
                 filterProducts(1);
@@ -432,22 +370,28 @@
         }
 
         // Search Filter
-        document.getElementById('searchInput').addEventListener('input', function(e) {
+        document.getElementById('searchInput')?.addEventListener('input', function (e) {
             const searchTerm = e.target.value.toLowerCase();
             filterProducts();
         });
 
         // Sort Products
-        document.getElementById('sortSelect').addEventListener('change', function(e) {
-            console.log('Sorting by:', e.target.value);
-            // Add sorting logic here
+        document.getElementById('sortSelect')?.addEventListener('change', function (e) {
+            filterProducts(1);
         });
 
         // Clear All Filters
         function clearAllFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('priceMin').value = 0;
-            document.getElementById('priceDisplay').textContent = '0';
+            const searchInput = document.getElementById('searchInput');
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const defaultPriceMin = {{ (float) ($priceMin ?? 0) }};
+            const defaultPriceMax = {{ (float) ($priceMax ?? 0) }};
+
+            if (searchInput) searchInput.value = '';
+            if (priceMin) priceMin.value = defaultPriceMin;
+            if (priceMax) priceMax.value = defaultPriceMax;
+            syncPriceRange();
             document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
             document.querySelectorAll('.size-filter-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.color-filter-btn').forEach(c => c.classList.remove('active'));
@@ -457,8 +401,10 @@
         // Filter Products with pagination
         function filterProducts(page = 1) {
             const perPage = 9; // products per page
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const minPrice = parseFloat(document.getElementById('priceMin').value) || 0;
+            const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const minPrice = parseFloat(document.getElementById('priceMin')?.value || '{{ (float) ($priceMin ?? 0) }}') || 0;
+            const maxPrice = parseFloat(document.getElementById('priceMax')?.value || String(catalogMaxPrice)) || catalogMaxPrice;
+            const sortBy = document.getElementById('sortSelect')?.value || 'newest';
 
             // brands
             const selectedBrands = Array.from(document.querySelectorAll('.filter-checkbox:checked')).map(i => i.value);
@@ -472,17 +418,26 @@
             // Filter using window.__products
             const filtered = window.__products.filter(p => {
                 if (searchTerm && !p.name.toLowerCase().includes(searchTerm)) return false;
-                if (minPrice && parseFloat(p.price) < minPrice) return false;
+                const price = parseFloat(p.price);
+                if (price < minPrice || price > maxPrice) return false;
                 if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
                 if (selectedSizes.length && (!p.sizes || !p.sizes.some(s => selectedSizes.includes(String(s))))) return false;
                 if (selectedColors.length && (!p.colors || !p.colors.some(c => selectedColors.includes(String(c))))) return false;
                 return true;
             });
 
+            filtered.sort((a, b) => {
+                if (sortBy === 'price-low') return parseFloat(a.price) - parseFloat(b.price);
+                if (sortBy === 'price-high') return parseFloat(b.price) - parseFloat(a.price);
+                if (sortBy === 'newest') return parseInt(b.id) - parseInt(a.id);
+                return String(a.name).localeCompare(String(b.name));
+            });
+
             // Compute availability for sizes/colors in real-time
             const filteredExceptSizes = window.__products.filter(p => {
                 if (searchTerm && !p.name.toLowerCase().includes(searchTerm)) return false;
-                if (minPrice && parseFloat(p.price) < minPrice) return false;
+                const price = parseFloat(p.price);
+                if (price < minPrice || price > maxPrice) return false;
                 if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
                 // do NOT apply size filter here
                 if (selectedColors.length && (!p.colors || !p.colors.some(c => selectedColors.includes(String(c))))) return false;
@@ -491,7 +446,8 @@
 
             const filteredExceptColors = window.__products.filter(p => {
                 if (searchTerm && !p.name.toLowerCase().includes(searchTerm)) return false;
-                if (minPrice && parseFloat(p.price) < minPrice) return false;
+                const price = parseFloat(p.price);
+                if (price < minPrice || price > maxPrice) return false;
                 if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
                 // do NOT apply color filter here
                 if (selectedSizes.length && (!p.sizes || !p.sizes.some(s => selectedSizes.includes(String(s))))) return false;
@@ -532,15 +488,29 @@
             const currentPage = Math.min(Math.max(1, page), totalPages);
             const start = (currentPage - 1) * perPage;
             const pageItems = filtered.slice(start, start + perPage);
+            const pageItemIds = new Set(pageItems.map(p => String(p.id)));
+            const productsGrid = document.getElementById('productsGrid');
+
+            if (productsGrid) {
+                pageItems.forEach(product => {
+                    const card = document.querySelector(`.product-card[data-product-id="${product.id}"]`);
+                    if (card) {
+                        productsGrid.appendChild(card);
+                    }
+                });
+            }
 
             // show/hide product cards based on filtered page items
             document.querySelectorAll('.product-card').forEach(card => {
-                const pid = parseInt(card.getAttribute('data-product-id'));
-                const shouldShow = pageItems.some(p => p.id == pid);
+                const pid = String(card.getAttribute('data-product-id'));
+                const shouldShow = pageItemIds.has(pid);
                 card.style.display = shouldShow ? '' : 'none';
             });
 
-            document.getElementById('shoeCount').textContent = `Showing ${total} products`;
+            const shoeCount = document.getElementById('shoeCount');
+            if (shoeCount) {
+                shoeCount.textContent = `Showing ${total} products`;
+            }
 
             renderPagination(totalPages, currentPage);
         }
@@ -581,6 +551,9 @@
         window.filterProducts = filterProducts;
 
         // initial filter render
+        if (priceMinInput) priceMinInput.value = 0;
+        if (priceMaxInput) priceMaxInput.value = catalogMaxPrice;
+        syncPriceRange();
         filterProducts(1);
     });
 </script>

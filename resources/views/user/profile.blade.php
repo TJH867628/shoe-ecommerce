@@ -41,8 +41,8 @@
                             <p class="font-bold text-slate-900">Placed {{ $order->created_at->diffForHumans() }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm text-slate-600">Status</p>
-                            <p class="font-bold text-slate-900">{{ ucfirst($order->status) }}</p>
+                            <p class="text-sm text-slate-600">Payment Status</p>
+                            <p class="font-bold text-slate-900">{{ ucfirst($order->payment->payment_status) }}</p>
                         </div>
                     </div>
 
@@ -56,7 +56,7 @@
                             $cover = $shoe?->images->firstWhere('is_cover', true) ?? $shoe?->images->first();
                             @endphp
                             <div class="flex items-center gap-4 py-3 border-b last:border-b-0">
-                                <img src="{{ $cover?->image_path ?? 'https://via.placeholder.com/100' }}" class="w-16 h-16 rounded-lg object-cover" alt="{{ $shoe?->shoe_name }}" />
+                                <img src="{{ $cover?->image_path ? (str_starts_with($cover->image_path, 'http') ? $cover->image_path : asset('storage/' . $cover->image_path)) : 'https://via.placeholder.com/100' }}" class="w-16 h-16 rounded-lg object-cover" alt="{{ $shoe?->shoe_name }}" />
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-slate-900">{{ $shoe?->shoe_name ?? 'Item' }}</p>
                                     <p class="text-xs text-slate-500">{{ $brand?->brand_name ?? '' }} • SKU: {{ $variation?->sku_code ?? '-' }}</p>

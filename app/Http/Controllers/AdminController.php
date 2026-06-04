@@ -7,7 +7,6 @@ use App\Models\Order;
 use App\Models\Shoe;
 use App\Models\ShoeVariations;
 use App\Models\User;
-use App\Models\Wishlist;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +23,6 @@ class AdminController extends Controller
             ['label' => 'Brands', 'value' => Brand::count(), 'note' => 'Active catalog brands'],
             ['label' => 'Shoes', 'value' => Shoe::count(), 'note' => 'Products in catalog'],
             ['label' => 'Orders', 'value' => Order::count(), 'note' => 'Placed purchases'],
-            ['label' => 'Wishlist Items', 'value' => Wishlist::count(), 'note' => 'Saved products'],
         ];
 
         $recentShoes = Shoe::with('brand')

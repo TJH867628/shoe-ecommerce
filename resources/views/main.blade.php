@@ -58,10 +58,7 @@
             @endphp
             <a href="{{ route('products.show', ['shoeId' => $shoe->id]) }}" class="group flex flex-col h-full text-left">
                 <div class="relative aspect-square overflow-hidden bg-slate-100 rounded-3xl mb-4">
-                    <img src="{{ $coverImage?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image' }}" alt="{{ $shoe->shoe_name }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out" />
-                    <button class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-slate-400 hover:text-red-500 hover:scale-110 transition-all z-10 wishlist-btn" data-shoe-id="{{ $shoe->id }}" onclick="event.preventDefault()">
-                        <i class="far fa-heart"></i>
-                    </button>
+                    <img src="{{ $coverImage?->image_path ? (str_starts_with($coverImage->image_path, 'http') ? $coverImage->image_path : asset('storage/' . $coverImage->image_path)) : 'https://via.placeholder.com/800x800?text=No+Image' }}" alt="{{ $shoe->shoe_name }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out" />
                 </div>
                 <div class="grow flex flex-col">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $shoe->brand?->brand_name ?? 'Brand' }}</span>
@@ -110,94 +107,4 @@
         </div>
     </section>
 </main>
-@endsection
-
-@section('scripts')
-<script>
-    // Wishlist Management for main page
-    let wishlistState = new Set();
-
-    // Load wishlist state
-    async function initializeWishlist() {
-        try {
-            const response = await fetch('{{ route("wishlist.items") }}');
-            const data = await response.json();
-            if (data.success) {
-                data.items.forEach(item => {
-                    wishlistState.add(item.product.id);
-                });
-                updateWishlistUI();
-            }
-        } catch (error) {
-            console.error('Error loading wishlist:', error);
-        }
-    }
-
-    function updateWishlistUI() {
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            const shoeId = parseInt(btn.getAttribute('data-shoe-id'));
-            const icon = btn.querySelector('i');
-
-            if (wishlistState.has(shoeId)) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-            }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize wishlist
-        initializeWishlist();
-
-        // Wishlist button handlers
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            btn.addEventListener('click', async function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const shoeId = parseInt(this.getAttribute('data-shoe-id'));
-                const isInWishlist = wishlistState.has(shoeId);
-                const route = isInWishlist ?
-                    `/wishlist/remove/${shoeId}` :
-                    `/wishlist/add/${shoeId}`;
-
-                try {
-                    const response = await fetch(route, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (response.status === 401) {
-                        alert('Please login to manage your wishlist');
-                        window.location.href = '{{ route("login") }}';
-                        return;
-                    }
-
-                    if (data.success) {
-                        if (isInWishlist) {
-                            wishlistState.delete(shoeId);
-                        } else {
-                            wishlistState.add(shoeId);
-                        }
-                        updateWishlistUI();
-                    } else {
-                        alert(data.message || 'Error updating wishlist');
-                    }
-                } catch (error) {
-                    console.error('Error updating wishlist:', error);
-                    alert('Error updating wishlist');
-                }
-            });
-        });
-    });
-</script>
 @endsection

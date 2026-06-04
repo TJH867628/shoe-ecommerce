@@ -70,6 +70,13 @@
             margin-top: 16px;
         }
 
+        .field-hint {
+            margin: 8px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -166,10 +173,10 @@
             <div class="panel">
                 <h2 class="section-title">Payment details</h2>
 
-                <form action="{{ route('checkout') }}" method="POST">
+                <form id="checkout-form" action="{{ route('checkout') }}" method="POST">
                     @csrf
 
-                    <div class="field">
+                    <div class="field" hidden>
                         <label for="amount">Amount</label>
                         <input id="amount" type="number" name="amount" value="{{ old('amount', number_format((float) ($amount ?? 500), 2, '.', '')) }}" min="0.01" step="0.01" required>
                     </div>
@@ -194,7 +201,17 @@
 
                     <div class="field">
                         <label for="customer_phone">Phone Number</label>
-                        <input id="customer_phone" type="text" name="customer_phone" value="{{ old('customer_phone', $customerPhone ?? '') }}" placeholder="0123456789" required>
+                        <input
+                            id="customer_phone"
+                            type="tel"
+                            name="customer_phone"
+                            value="{{ old('customer_phone', $customerPhone ?? '') }}"
+                            placeholder="0123456789"
+                            inputmode="tel"
+                            title="Enter a valid Malaysia phone number, for example 0123456789 or +60123456789."
+                            required
+                        >
+                        <p class="field-hint">Use a Malaysia number such as 0123456789 or +60123456789. Spaces and dashes are accepted.</p>
                     </div>
 
                     <button type="submit">Continue to Payment</button>
@@ -237,6 +254,40 @@
             </div>
         </div>
     </div>
+    <script>
+        (function () {
+            const phoneInput = document.getElementById('customer_phone');
+            const checkoutForm = document.getElementById('checkout-form');
+            const malaysiaPhonePattern = /^0(?:1[0-46-9][0-9]{7,8}|[3-9][0-9]{7,8})$/;
+
+            function normalizeMalaysiaPhone(phone) {
+                let normalized = phone.replace(/[\s\-.()]/g, '');
+
+                if (normalized.startsWith('+60')) {
+                    normalized = '0' + normalized.slice(3);
+                } else if (normalized.startsWith('60')) {
+                    normalized = '0' + normalized.slice(2);
+                }
+
+                return normalized;
+            }
+
+            function validatePhone() {
+                const normalized = normalizeMalaysiaPhone(phoneInput.value);
+                const isValid = malaysiaPhonePattern.test(normalized);
+                phoneInput.setCustomValidity(isValid ? '' : 'Enter a valid Malaysia phone number, for example 0123456789 or +60123456789.');
+                return isValid;
+            }
+
+            phoneInput?.addEventListener('input', validatePhone);
+            checkoutForm?.addEventListener('submit', function (event) {
+                if (!validatePhone()) {
+                    event.preventDefault();
+                    phoneInput.reportValidity();
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
