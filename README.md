@@ -1,102 +1,122 @@
 # Shoe E-Commerce
 
-Laravel-based shoe e-commerce application with a customer storefront and admin management pages.
+Laravel-based shoe e-commerce application with customer and admin features.
 
-## What You Need
+## Setup Guide
 
-- PHP `8.3`
+### 1. Prerequisites
+
+Make sure you have:
+
+- PHP 8.3
 - Composer
 - Node.js and npm
-- A database connection configured in `.env`
+- MySQL or another supported database
 
-## Quick Setup
-
-1. Install PHP dependencies.
-   ```bash
-   composer install
-   ```
-
-2. Create your environment file if it does not exist.
-   ```bash
-   copy .env.example .env
-   ```
-
-3. Generate an app key.
-   ```bash
-   php artisan key:generate
-   ```
-
-4. Configure your database in `.env`.
-   - Update `DB_CONNECTION`
-   - Update `DB_DATABASE`
-   - Update `DB_USERNAME`
-   - Update `DB_PASSWORD`
-
-5. Run migrations.
-   ```bash
-   php artisan migrate
-   ```
-
-6. Install frontend dependencies.
-   ```bash
-   npm install
-   ```
-
-7. Build the frontend assets.
-   ```bash
-   npm run build
-   ```
-
-8. Start the app.
-   ```bash
-   php artisan serve
-   ```
-
-## Recommended One-Line Setup
-
-If you want the fastest local setup, use the Composer script:
+### 2. Install Dependencies
 
 ```bash
-composer run setup
+composer install
+npm install
 ```
 
-This will install dependencies, create `.env` if needed, generate the app key, run migrations, install npm packages, and build assets.
+### 3. Configure Environment
 
-## Development Workflow
+Copy the example environment file if needed:
 
-- Start the full local dev stack:
+```bash
+copy .env.example .env
+```
+
+Then update the database settings in `.env`:
+
+- `DB_CONNECTION`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_DATABASE`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+
+### 4. Generate App Key
+
+```bash
+php artisan key:generate
+```
+
+### 5. Create Database Tables and Seed Data
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+This will reset the database and load the sample data.
+
+### 6. Link Storage
+
+```bash
+php artisan storage:link
+```
+
+### 7. Build Frontend Assets
+
+For production build:
+
+```bash
+npm run build
+```
+
+For development:
+
+```bash
+npm run dev
+```
+
+### 8. Run the App
+
+Start the Laravel server:
+
+```bash
+php artisan serve
+```
+
+## Default Login Accounts
+
+- Customer
+  - Email: `test@example.com`
+  - Password: `password`
+
+- Admin
+  - Email: `admin@example.com`
+  - Password: `password`
+
+## Helpful Commands
+
+- Reset and reseed the database:
   ```bash
-  composer run dev
+  php artisan migrate:fresh --seed
   ```
 
-- Run tests:
-  ```bash
-  composer run test
-  ```
-
-## Useful Notes For Teammates
-
-- Product listing and product details live in the `resources/views/user/` folder.
-- Admin product management views live in `resources/views/admin/`.
-- If product images do not show up, make sure storage is linked:
-  ```bash
-  php artisan storage:link
-  ```
-- If you change environment values, clear config cache:
+- Clear config cache:
   ```bash
   php artisan config:clear
   ```
 
+- Clear application cache:
+  ```bash
+  php artisan cache:clear
+  ```
+
 ## Project Structure
 
-- `app/Http/Controllers` - application controllers
-- `resources/views` - Blade templates
+- `app/Http/Controllers` - controllers
+- `app/Models` - Eloquent models
+- `resources/views` - Blade views
 - `database/migrations` - database schema
 - `database/seeders` - seed data
 - `routes/web.php` - web routes
 
 ## Notes
 
-- The project uses Laravel 13.
-- Frontend assets are built with Vite.
+- The project uses Vite for frontend assets.
+- Product images may come from local storage or external URLs, depending on the data source.
 
