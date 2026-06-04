@@ -44,7 +44,6 @@ class PaymentController extends Controller
 
         $order = Order::create([
             'user_id' => auth()->id(),
-            'voucher_id' => null,
             'total_amount' => $validated['amount'],
             'status' => 'pending',
         ]);
