@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="min-h-screen bg-slate-50">
-    
+
     <!-- Header Section -->
     <div class="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -20,14 +20,14 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col lg:flex-row gap-8">
 
             <!-- SIDEBAR: Filters -->
             <aside class="w-full lg:w-64 shrink-0">
-                
+
                 <!-- Mobile Filter Toggle -->
                 <button id="toggleFilters" class="w-full lg:hidden mb-4 bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition">
                     <i class="fas fa-filter"></i>
@@ -36,12 +36,12 @@
 
                 <!-- Filters Panel -->
                 <div id="filtersPanel" class="hidden lg:block bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
-                    
+
                     <!-- Search Filter -->
                     <div>
                         <label class="block text-sm font-bold text-slate-900 mb-3">Search</label>
-                        <input type="text" id="searchInput" placeholder="Search shoes..." 
-                               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="searchInput" placeholder="Search shoes..."
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
                     </div>
 
                     <!-- Price Range -->
@@ -49,8 +49,8 @@
                         <label class="block text-sm font-bold text-slate-900 mb-3">Price Range</label>
                         <div class="space-y-3">
                             <div class="flex items-center">
-                                <input type="range" id="priceMin" min="0" max="500" value="0" 
-                                       class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer">
+                                <input type="range" id="priceMin" min="0" max="500" value="0"
+                                    class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer">
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-semibold text-slate-900">$<span id="priceDisplay">0</span></span>
@@ -65,10 +65,10 @@
                         <label class="block text-sm font-bold text-slate-900 mb-3">Brand</label>
                         <div class="space-y-2 max-h-60 overflow-y-auto">
                             @foreach($brands as $brand)
-                                <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition">
-                                    <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-slate-300" value="{{ $brand }}">
-                                    <span class="text-sm text-slate-700">{{ $brand }}</span>
-                                </label>
+                            <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition">
+                                <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-slate-300" value="{{ $brand }}">
+                                <span class="text-sm text-slate-700">{{ $brand }}</span>
+                            </label>
                             @endforeach
                         </div>
                     </div>
@@ -78,9 +78,9 @@
                         <label class="block text-sm font-bold text-slate-900 mb-3">Size</label>
                         <div class="grid grid-cols-3 gap-2">
                             @foreach($sizes as $size)
-                                <button class="size-filter-btn p-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition">
-                                    {{ $size }}
-                                </button>
+                            <button class="size-filter-btn p-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition">
+                                {{ $size }}
+                            </button>
                             @endforeach
                         </div>
                     </div>
@@ -90,23 +90,23 @@
                         <label class="block text-sm font-bold text-slate-900 mb-3">Color</label>
                         <div class="space-y-2">
                             @php
-                                $allColors = collect($sampleProducts)
-                                    ->flatMap(fn($p) => $p['colors'] ?? [])
-                                    ->filter()
-                                    ->unique()
-                                    ->values()
-                                    ->all();
+                            $allColors = collect($sampleProducts)
+                            ->flatMap(fn($p) => $p['colors'] ?? [])
+                            ->filter()
+                            ->unique()
+                            ->values()
+                            ->all();
 
-                                $colorClasses = ['White' => 'bg-white', 'Black' => 'bg-black', 'Red' => 'bg-red-500', 'Blue' => 'bg-blue-500', 'Gray' => 'bg-gray-400', 'Brown' => 'bg-amber-800'];
+                            $colorClasses = ['White' => 'bg-white', 'Black' => 'bg-black', 'Red' => 'bg-red-500', 'Blue' => 'bg-blue-500', 'Gray' => 'bg-gray-400', 'Brown' => 'bg-amber-800'];
                             @endphp
                             <div class="flex flex-wrap gap-2">
                                 @forelse($allColors as $colorName)
-                                    <button type="button" data-color="{{ $colorName }}" class="color-filter-btn flex items-center gap-3 p-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition">
-                                        <div class="w-6 h-6 rounded {{ $colorClasses[$colorName] ?? 'bg-slate-400' }} border border-slate-300"></div>
-                                        <span class="text-sm text-slate-700">{{ $colorName }}</span>
-                                    </button>
+                                <button type="button" data-color="{{ $colorName }}" class="color-filter-btn flex items-center gap-3 p-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition">
+                                    <div class="w-6 h-6 rounded {{ $colorClasses[$colorName] ?? 'bg-slate-400' }} border border-slate-300"></div>
+                                    <span class="text-sm text-slate-700">{{ $colorName }}</span>
+                                </button>
                                 @empty
-                                    <div class="text-sm text-slate-500">No colors available</div>
+                                <div class="text-sm text-slate-500">No colors available</div>
                                 @endforelse
                             </div>
                         </div>
@@ -136,7 +136,7 @@
                             <option value="rating">Highest Rated</option>
                         </select>
                     </div>
-                    
+
                     <div class="flex items-center gap-2">
                         <button class="p-2 rounded-lg border border-slate-300 hover:bg-slate-100 transition grid-view-btn active" onclick="setGridView(3)">
                             <i class="fas fa-th text-slate-700"></i>
@@ -152,64 +152,64 @@
 
                 <!-- Products Grid -->
                 <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    
+
                     @foreach($sampleProducts as $product)
-                        <div class="product-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition group" data-product-id="{{ $product['id'] }}">
-                            
-                            <!-- Image Container -->
-                            <div class="relative overflow-hidden bg-slate-100 aspect-square">
-                                <img src="{{ $product['image'] }}" 
-                                     alt="{{ $product['name'] }}"
-                                     class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
-                                
-                                <!-- Discount Badge -->
-                                <div class="absolute top-3 right-3 bg-slate-900 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                    In stock: {{ $product['stock'] }}
-                                </div>
+                    <div class="product-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition group" data-product-id="{{ $product['id'] }}">
 
-                                <!-- Wishlist Button -->
-                                <button type="button" class="wishlist-btn absolute top-3 left-3 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-red-50 transition opacity-0 group-hover:opacity-100 cursor-pointer" data-shoe-id="{{ $product['id'] }}" title="Add to wishlist">
-                                    <i class="far fa-heart text-red-500 text-lg"></i>
-                                </button>
+                        <!-- Image Container -->
+                        <div class="relative overflow-hidden bg-slate-100 aspect-square">
+                            <img src="{{ $product['image'] }}"
+                                alt="{{ $product['name'] }}"
+                                class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
 
-                                <!-- Quick View Button -->
-                                <a href="{{ route('products.show', ['shoeId' => $product['id']]) }}" class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white font-semibold py-3 translate-y-full group-hover:translate-y-0 transition duration-300 text-center">
-                                    Quick View
-                                </a>
+                            <!-- Discount Badge -->
+                            <div class="absolute top-3 right-3 bg-slate-900 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                In stock: {{ $product['stock'] }}
                             </div>
 
-                            <!-- Product Info -->
-                            <div class="p-4">
-                                <p class="text-xs font-bold text-blue-600 mb-1">{{ $product['brand'] }}</p>
-                                <h3 class="text-sm font-bold text-slate-900 mb-2 line-clamp-2 hover:text-blue-600 cursor-pointer">
-                                    {{ $product['name'] }}
-                                </h3>
+                            <!-- Wishlist Button -->
+                            <button type="button" class="wishlist-btn absolute top-3 left-3 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-red-50 transition opacity-0 group-hover:opacity-100 cursor-pointer" data-shoe-id="{{ $product['id'] }}" title="Add to wishlist">
+                                <i class="far fa-heart text-red-500 text-lg"></i>
+                            </button>
 
-                                <!-- Price -->
-                                <div class="flex items-baseline gap-2 mb-4">
-                                    <span class="text-lg font-bold text-slate-900">RM{{ number_format($product['price'], 2) }}</span>
-                                </div>
-
-                                <!-- Add to Cart Button -->
-                                @if(!empty($product['variation_id']))
-                                    <form action="{{ route('cart.add') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="shoe_id" value="{{ $product['id'] }}">
-                                        <input type="hidden" name="variation_id" value="{{ $product['variation_id'] }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                                            <i class="fas fa-shopping-cart text-sm"></i>
-                                            Add to Cart
-                                        </button>
-                                    </form>
-                                @else
-                                    <button type="button" disabled class="w-full bg-slate-300 text-slate-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
-                                        <i class="fas fa-shopping-cart text-sm"></i>
-                                        Add to Cart
-                                    </button>
-                                @endif
-                            </div>
+                            <!-- Quick View Button -->
+                            <a href="{{ route('products.show', ['shoeId' => $product['id']]) }}" class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white font-semibold py-3 translate-y-full group-hover:translate-y-0 transition duration-300 text-center">
+                                Quick View
+                            </a>
                         </div>
+
+                        <!-- Product Info -->
+                        <div class="p-4">
+                            <p class="text-xs font-bold text-blue-600 mb-1">{{ $product['brand'] }}</p>
+                            <h3 class="text-sm font-bold text-slate-900 mb-2 line-clamp-2 hover:text-blue-600 cursor-pointer">
+                                {{ $product['name'] }}
+                            </h3>
+
+                            <!-- Price -->
+                            <div class="flex items-baseline gap-2 mb-4">
+                                <span class="text-lg font-bold text-slate-900">RM{{ number_format($product['price'], 2) }}</span>
+                            </div>
+
+                            <!-- Add to Cart Button -->
+                            @if(!empty($product['variation_id']))
+                            <form action="{{ route('cart.add') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="shoe_id" value="{{ $product['id'] }}">
+                                <input type="hidden" name="variation_id" value="{{ $product['variation_id'] }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                                    <i class="fas fa-shopping-cart text-sm"></i>
+                                    Add to Cart
+                                </button>
+                            </form>
+                            @else
+                            <button type="button" disabled class="w-full bg-slate-300 text-slate-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
+                                <i class="fas fa-shopping-cart text-sm"></i>
+                                Add to Cart
+                            </button>
+                            @endif
+                        </div>
+                    </div>
                     @endforeach
 
                 </div>
@@ -290,7 +290,9 @@
     let wishlistState = new Set();
 
     // Expose products for client-side filtering and pagination
-    window.__products = {!! json_encode($sampleProducts) !!};
+    window.__products = {
+        !!json_encode($sampleProducts) !!
+    };
 
     // Load wishlist state from session
     async function initializeWishlist() {
@@ -312,7 +314,7 @@
         document.querySelectorAll('.wishlist-btn').forEach(btn => {
             const shoeId = parseInt(btn.getAttribute('data-shoe-id'));
             const icon = btn.querySelector('i');
-            
+
             if (wishlistState.has(shoeId)) {
                 icon.classList.remove('far');
                 icon.classList.add('fas');
@@ -334,12 +336,12 @@
             btn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const shoeId = parseInt(this.getAttribute('data-shoe-id'));
                 const isInWishlist = wishlistState.has(shoeId);
-                const route = isInWishlist 
-                    ? `/wishlist/remove/${shoeId}` 
-                    : `/wishlist/add/${shoeId}`;
+                const route = isInWishlist ?
+                    `/wishlist/remove/${shoeId}` :
+                    `/wishlist/add/${shoeId}`;
 
                 try {
                     const response = await fetch(route, {
@@ -352,7 +354,7 @@
                     });
 
                     const data = await response.json();
-                    
+
                     if (response.status === 401) {
                         alert('Please login to manage your wishlist');
                         window.location.href = '{{ route("login") }}';
@@ -413,7 +415,7 @@
         function setGridView(cols) {
             const grid = document.getElementById('productsGrid');
             grid.className = `grid gap-6`;
-            
+
             if (cols === 1) {
                 grid.classList.add('grid-cols-1');
             } else if (cols === 2) {

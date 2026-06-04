@@ -24,15 +24,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::updateOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => Hash::make('password'),
-                'role' => 'customer',
-                'phone' => '0123456789',
-            ]
-        );
+        $user = User::firstOrNew(['email' => 'test@example.com']);
+        $user->forceFill([
+            'name' => 'Test User',
+            'password' => Hash::make('password'),
+            'role' => 'customer',
+            'phone' => '0123456789',
+        ])->save();
+
+        $admin = User::firstOrNew(['email' => 'admin@example.com']);
+        $admin->forceFill([
+            'name' => 'Admin User',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'phone' => '0999999999',
+        ])->save();
 
         $nike = Brand::updateOrCreate(
             ['brand_name' => 'Nike'],

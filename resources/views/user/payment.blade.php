@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Checkout</title>
     <style>
@@ -153,6 +154,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page">
         <div class="header">
@@ -169,63 +171,66 @@
 
                     <div class="field">
                         <label for="amount">Amount</label>
-                        <input id="amount" type="number" name="amount" value="500.00" min="0.01" step="0.01" required>
+                        <input id="amount" type="number" name="amount" value="{{ old('amount', number_format((float) ($amount ?? 500), 2, '.', '')) }}" min="0.01" step="0.01" required>
                     </div>
 
                     <div class="field">
                         <label for="payment_type">Payment Method</label>
                         <select id="payment_type" name="payment_type" required>
-                            <option value="FPX">FPX</option>
-                            <option value="Card">Card</option>
+                            <option value="FPX" @selected(old('payment_type', $paymentType ?? 'FPX' )==='FPX' )>FPX</option>
+                            <option value="Card" @selected(old('payment_type', $paymentType ?? '' )==='Card' )>Card</option>
                         </select>
                     </div>
 
                     <div class="field">
                         <label for="customer_name">Full Name</label>
-                        <input id="customer_name" type="text" name="customer_name" placeholder="John Doe" required>
+                        <input id="customer_name" type="text" name="customer_name" value="{{ old('customer_name', $customerName ?? '') }}" placeholder="John Doe" required>
                     </div>
 
                     <div class="field">
                         <label for="customer_email">Email</label>
-                        <input id="customer_email" type="email" name="customer_email" placeholder="john@example.com" required>
+                        <input id="customer_email" type="email" name="customer_email" value="{{ old('customer_email', $customerEmail ?? '') }}" placeholder="john@example.com" required>
                     </div>
 
                     <div class="field">
                         <label for="customer_phone">Phone Number</label>
-                        <input id="customer_phone" type="text" name="customer_phone" placeholder="0123456789" required>
+                        <input id="customer_phone" type="text" name="customer_phone" value="{{ old('customer_phone', $customerPhone ?? '') }}" placeholder="0123456789" required>
                     </div>
 
                     <button type="submit">Continue to Payment</button>
                 </form>
 
                 @if($errors->any())
-                    <div class="errors banner">
-                        <strong>Validation failed</strong>
-                        <ul style="margin: 10px 0 0; padding-left: 18px;">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+                <div class="errors banner">
+                    <strong>Validation failed</strong>
+                    <ul style="margin: 10px 0 0; padding-left: 18px;">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
                 @endif
 
                 @if(session('success'))
-                    <div class="banner banner-success">
-                        {{ session('success') }}
-                    </div>
+                <div class="banner banner-success">
+                    {{ session('success') }}
+                </div>
                 @endif
 
                 @if(session('failed'))
-                    <div class="banner banner-failed">
-                        {{ session('failed') }}
-                    </div>
+                <div class="banner banner-failed">
+                    {{ session('failed') }}
+                </div>
                 @endif
             </div>
 
             <div class="panel">
                 <h2 class="section-title">Order summary</h2>
                 <div class="summary-box">
-                    <p><strong>Subtotal:</strong> RM 500.00</p>
+                    <p><strong>Subtotal:</strong> RM {{ number_format((float) ($subtotal ?? 500), 2) }}</p>
+                    <p><strong>Discount:</strong> RM {{ number_format((float) ($discountAmount ?? 0), 2) }}</p>
+                    <p><strong>Shipping:</strong> RM {{ number_format((float) ($shipping ?? 0), 2) }}</p>
+                    <p><strong>Shipping Method:</strong> {{ ucfirst($shippingMethod ?? 'standard') }}</p>
                     <p><strong>Payment:</strong> ToyyibPay sandbox</p>
                     <p><strong>Methods:</strong> FPX or Card</p>
                 </div>
@@ -233,4 +238,5 @@
         </div>
     </div>
 </body>
+
 </html>

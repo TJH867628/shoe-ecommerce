@@ -15,11 +15,13 @@ class BrandController extends Controller
     public function createBrand(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'brand_name' => ['required', 'string', 'max:255'],
+            'brand_description' => ['nullable', 'string'],
         ]);
 
-        $brand = Brand::create([
-            'name' => $request->name,
+        Brand::create([
+            'brand_name' => $request->brand_name,
+            'brand_description' => $request->brand_description,
         ]);
 
         return redirect()->back()->with(
@@ -31,13 +33,15 @@ class BrandController extends Controller
     public function updateBrand(Request $request, int $brandId)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'brand_name' => ['required', 'string', 'max:255'],
+            'brand_description' => ['nullable', 'string'],
         ]);
 
         $brand = Brand::findOrFail($brandId);
 
         $brand->update([
-            'name' => $request->name,
+            'brand_name' => $request->brand_name,
+            'brand_description' => $request->brand_description,
         ]);
 
         return redirect()->back()->with(

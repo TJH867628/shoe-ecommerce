@@ -130,7 +130,17 @@
 						<span class="text-2xl font-black text-slate-900">RM{{ number_format($total, 2) }}</span>
 					</div>
 
-					<button type="button" class="mt-6 w-full py-3 rounded-xl bg-slate-900 text-white font-black hover:bg-slate-800 transition">Proceed to Checkout</button>
+					<a href="{{ route('user.payment', [
+						'amount' => number_format($total, 2, '.', ''),
+						'subtotal' => number_format($subtotal, 2, '.', ''),
+						'discount_amount' => number_format($discountAmount, 2, '.', ''),
+						'shipping' => number_format($shipping, 2, '.', ''),
+						'shipping_method' => $shippingMethod,
+						'payment_type' => 'FPX',
+						'customer_name' => auth()->user()?->name,
+						'customer_email' => auth()->user()?->email,
+						'customer_phone' => auth()->user()?->phone,
+					]) }}" class="mt-6 w-full inline-flex items-center justify-center py-3 rounded-xl bg-slate-900 text-white font-black hover:bg-slate-800 transition">Proceed to Checkout</a>
 
 					<div class="mt-5 p-4 rounded-xl bg-cyan-50 border border-cyan-100">
 						<p class="text-xs font-bold text-cyan-700 uppercase tracking-wider">Promo Code</p>

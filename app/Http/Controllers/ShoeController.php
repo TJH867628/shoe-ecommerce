@@ -15,6 +15,7 @@ use App\Models\ShoeVariationImage;
 use App\Services\Builders\Directors\ShoeSkuDirector;
 use App\Services\Builders\Directors\ShoeDirector;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class ShoeController extends Controller
 {
@@ -43,7 +44,7 @@ class ShoeController extends Controller
 
     public function wishlist()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         if (!$user) {
             $wishlistItems = collect();
@@ -141,7 +142,7 @@ class ShoeController extends Controller
         $brands = \App\Models\Brand::all();
 
         return view(
-            'test-product',
+            'admin.product',
             compact('shoe', 'brands')
         );
     }
@@ -481,7 +482,7 @@ class ShoeController extends Controller
 
     public function addToWishlist(int $shoeId)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         if (!$user) {
             return response()->json([
@@ -509,7 +510,7 @@ class ShoeController extends Controller
 
     public function removeFromWishlist(int $shoeId)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         if (!$user) {
             return response()->json([
@@ -533,7 +534,7 @@ class ShoeController extends Controller
 
     public function getWishlistItems()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         if (!$user) {
             return response()->json([

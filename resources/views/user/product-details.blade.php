@@ -4,9 +4,9 @@
 
 @section('content')
 @php
-    $coverImage = $shoe->images->firstWhere('is_cover', true)
-        ?? $shoe->images->sortBy('sort_order')->first();
-    $activeVariation = $shoe->variations->first();
+$coverImage = $shoe->images->firstWhere('is_cover', true)
+?? $shoe->images->sortBy('sort_order')->first();
+$activeVariation = $shoe->variations->first();
 @endphp
 
 <div class="min-h-screen bg-white py-10">
@@ -19,11 +19,11 @@
             <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
                 <img src="{{ $coverImage?->image_path ?? 'https://via.placeholder.com/1200x1200?text=No+Image' }}" alt="{{ $shoe->shoe_name }}" class="w-full h-130 object-cover rounded-lg">
                 @if($shoe->images->count() > 1)
-                    <div class="mt-4 grid grid-cols-4 gap-3">
-                        @foreach($shoe->images->take(4) as $image)
-                            <img src="{{ $image->image_path }}" alt="{{ $shoe->shoe_name }}" class="h-20 w-full object-cover rounded-lg border border-slate-100">
-                        @endforeach
-                    </div>
+                <div class="mt-4 grid grid-cols-4 gap-3">
+                    @foreach($shoe->images->take(4) as $image)
+                    <img src="{{ $image->image_path }}" alt="{{ $shoe->shoe_name }}" class="h-20 w-full object-cover rounded-lg border border-slate-100">
+                    @endforeach
+                </div>
                 @endif
             </div>
 
@@ -53,7 +53,7 @@
                             <label class="font-semibold text-slate-900 mb-2 block">Size</label>
                             <div id="size-buttons" class="flex flex-wrap gap-2">
                                 @foreach($sizes as $size)
-                                    <button type="button" data-size="{{ $size }}" class="size-btn px-3 py-2 border rounded-md text-sm bg-white hover:border-slate-300">{{ $size }}</button>
+                                <button type="button" data-size="{{ $size }}" class="size-btn px-3 py-2 border rounded-md text-sm bg-white hover:border-slate-300">{{ $size }}</button>
                                 @endforeach
                             </div>
                         </div>
@@ -62,7 +62,7 @@
                             <label class="font-semibold text-slate-900 mb-2 block">Color</label>
                             <div id="color-buttons" class="flex flex-wrap gap-2">
                                 @foreach($colors as $color)
-                                    <button type="button" data-color="{{ $color }}" class="color-btn px-3 py-2 border rounded-md text-sm bg-white hover:border-slate-300">{{ $color }}</button>
+                                <button type="button" data-color="{{ $color }}" class="color-btn px-3 py-2 border rounded-md text-sm bg-white hover:border-slate-300">{{ $color }}</button>
                                 @endforeach
                             </div>
                         </div>
@@ -99,16 +99,16 @@
                             </thead>
                             <tbody>
                                 @forelse($variationMatrix as $variation)
-                                    <tr class="border-b last:border-b-0">
-                                        <td class="py-2 pr-4 font-mono text-xs">{{ $variation['sku_code'] ?? '-' }}</td>
-                                        <td class="py-2 pr-4">{{ $variation['size'] ?? '-' }}</td>
-                                        <td class="py-2 pr-4">{{ $variation['color'] ?? '-' }}</td>
-                                        <td class="py-2 pr-4">{{ $variation['stock_quantity'] }}</td>
-                                    </tr>
+                                <tr class="border-b last:border-b-0">
+                                    <td class="py-2 pr-4 font-mono text-xs">{{ $variation['sku_code'] ?? '-' }}</td>
+                                    <td class="py-2 pr-4">{{ $variation['size'] ?? '-' }}</td>
+                                    <td class="py-2 pr-4">{{ $variation['color'] ?? '-' }}</td>
+                                    <td class="py-2 pr-4">{{ $variation['stock_quantity'] }}</td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="4" class="py-4 text-slate-500">No variations found for this shoe.</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="4" class="py-4 text-slate-500">No variations found for this shoe.</td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -133,14 +133,16 @@
 @section('scripts')
 <script>
     // Build a lightweight variations array for client-side matching
-    window.__shoeVariations = {!! json_encode($shoe->variations->map(function($v){
-        return [
-            'id' => $v->id,
-            'attributes' => $v->attributes ?? [],
-            'stock_quantity' => $v->stock_quantity ?? 0,
-            'sku_code' => $v->sku_code ?? null
-        ];
-    })) !!};
+    window.__shoeVariations = {
+        !!json_encode($shoe - > variations - > map(function($v) {
+            return [
+                'id' => $v - > id,
+                'attributes' => $v - > attributes ?? [],
+                'stock_quantity' => $v - > stock_quantity ?? 0,
+                'sku_code' => $v - > sku_code ?? null
+            ];
+        })) !!
+    };
 
     // Build attribute mappings for Shopee-like filtering
     function buildAttributeMappings() {
@@ -155,13 +157,16 @@
             if (size && color) {
                 if (!sizesToColors[size]) sizesToColors[size] = [];
                 if (!colorsToSizes[color]) colorsToSizes[color] = [];
-                
+
                 if (!sizesToColors[size].includes(color)) sizesToColors[size].push(color);
                 if (!colorsToSizes[color].includes(size)) colorsToSizes[color].push(size);
             }
         });
 
-        return { sizesToColors, colorsToSizes };
+        return {
+            sizesToColors,
+            colorsToSizes
+        };
     }
 
     const attributeMappings = buildAttributeMappings();
@@ -255,7 +260,11 @@
             if (input) input.value = match.id;
             if (skuEl) skuEl.textContent = match.sku_code ?? '-';
             if (stockEl) stockEl.textContent = (match.stock_quantity ?? 0);
-            if (priceEl) priceEl.textContent = 'RM' + (parseFloat({{ $shoe->shoe_price }})?.toFixed(2) ?? '0.00');
+            if (priceEl) priceEl.textContent = 'RM' + (parseFloat({
+                {
+                    $shoe - > shoe_price
+                }
+            })?.toFixed(2) ?? '0.00');
             if (addBtn) addBtn.disabled = false;
         } else {
             // no match
@@ -269,20 +278,20 @@
     document.addEventListener('DOMContentLoaded', function() {
         // wire size/color buttons with Shopee-like availability logic
         document.querySelectorAll('.size-btn').forEach(btn => {
-            btn.addEventListener('click', function(){
+            btn.addEventListener('click', function() {
                 if (this.disabled) return;
                 document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active', 'border-slate-900', 'border-2'));
-                this.classList.add('active','border-slate-900', 'border-2');
+                this.classList.add('active', 'border-slate-900', 'border-2');
                 updateColorAvailability();
                 updateVariationDisplay();
             });
         });
 
         document.querySelectorAll('.color-btn').forEach(btn => {
-            btn.addEventListener('click', function(){
+            btn.addEventListener('click', function() {
                 if (this.disabled) return;
                 document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active', 'border-slate-900', 'border-2'));
-                this.classList.add('active','border-slate-900', 'border-2');
+                this.classList.add('active', 'border-slate-900', 'border-2');
                 updateSizeAvailability();
                 updateVariationDisplay();
             });
@@ -291,29 +300,43 @@
         // quantity
         const qtyDisplay = document.getElementById('qty-display');
         const qtyInput = document.getElementById('quantity-input');
-        document.getElementById('qty-increase').addEventListener('click', function(){
-            let q = parseInt(qtyDisplay.textContent) || 1; q++; qtyDisplay.textContent = q; if (qtyInput) qtyInput.value = q;
+        document.getElementById('qty-increase').addEventListener('click', function() {
+            let q = parseInt(qtyDisplay.textContent) || 1;
+            q++;
+            qtyDisplay.textContent = q;
+            if (qtyInput) qtyInput.value = q;
         });
-        document.getElementById('qty-decrease').addEventListener('click', function(){
-            let q = parseInt(qtyDisplay.textContent) || 1; q = Math.max(1, q-1); qtyDisplay.textContent = q; if (qtyInput) qtyInput.value = q;
+        document.getElementById('qty-decrease').addEventListener('click', function() {
+            let q = parseInt(qtyDisplay.textContent) || 1;
+            q = Math.max(1, q - 1);
+            qtyDisplay.textContent = q;
+            if (qtyInput) qtyInput.value = q;
         });
 
         // wire bottom bar buttons to form actions
-        document.getElementById('bottom-add').addEventListener('click', function(){ document.getElementById('add-to-cart-btn').click(); });
-        document.getElementById('bottom-buy').addEventListener('click', function(){ document.getElementById('buy-now-btn').click(); });
+        document.getElementById('bottom-add').addEventListener('click', function() {
+            document.getElementById('add-to-cart-btn').click();
+        });
+        document.getElementById('bottom-buy').addEventListener('click', function() {
+            document.getElementById('buy-now-btn').click();
+        });
 
         // pre-select active variation attributes
-        const activeId = {{ $activeVariation?->id ?? 'null' }};
+        const activeId = {
+            {
+                $activeVariation ? - > id ?? 'null'
+            }
+        };
         if (activeId) {
             const av = window.__shoeVariations.find(v => v.id == activeId);
             if (av && av.attributes) {
                 if (av.attributes.size) {
                     const btn = document.querySelector('.size-btn[data-size="' + av.attributes.size + '"]');
-                    if (btn) btn.classList.add('active','border-slate-900', 'border-2');
+                    if (btn) btn.classList.add('active', 'border-slate-900', 'border-2');
                 }
                 if (av.attributes.color) {
                     const btn = document.querySelector('.color-btn[data-color="' + av.attributes.color + '"]');
-                    if (btn) btn.classList.add('active','border-slate-900', 'border-2');
+                    if (btn) btn.classList.add('active', 'border-slate-900', 'border-2');
                 }
             }
         }

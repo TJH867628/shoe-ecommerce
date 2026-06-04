@@ -3,13 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShoeController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShoePrototypeController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
+use App\Models\Brand;
+use App\Models\Order;
 use App\Models\Shoe;
+use App\Models\User;
+use App\Models\Wishlist;
 /*
 GET
 */
@@ -28,6 +34,124 @@ Route::get('/user/product', [ShoeController::class, 'index'])->name('product');
 Route::get('/user/wishlist', [ShoeController::class, 'wishlist'])->name('wishlist');
 Route::get('/wishlist/items', [ShoeController::class, 'getWishlistItems'])->name('wishlist.items');
 Route::get('/user/cart', [CartController::class, 'show'])->name('cart.index');
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', function (Request $request) {
+            $adminUser = $request->user();
+
+            $stats = [
+                ['label' => 'Total Users', 'value' => User::count(), 'note' => 'Registered accounts'],
+                ['label' => 'Admin Accounts', 'value' => User::where('role', 'admin')->count(), 'note' => 'Privileged access'],
+                ['label' => 'Brands', 'value' => Brand::count(), 'note' => 'Active catalog brands'],
+                ['label' => 'Shoes', 'value' => Shoe::count(), 'note' => 'Products in catalog'],
+                ['label' => 'Orders', 'value' => Order::count(), 'note' => 'Placed purchases'],
+                ['label' => 'Wishlist Items', 'value' => Wishlist::count(), 'note' => 'Saved products'],
+            ];
+
+            $recentShoes = Shoe::with('brand')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $recentUsers = User::latest()
+                ->take(5)
+                ->get();
+
+            $recentOrders = Order::with('user')
+                ->latest()
+                ->take(8)
+                ->get();
+
+            return view('admin.dashboard', compact('adminUser', 'stats', 'recentShoes', 'recentUsers', 'recentOrders'));
+        })->name('dashboard');
+
+        Route::get('/shoes', function () {
+            $shoes = Shoe::with([
+                'brand',
+                'options',
+                'variations',
+                'images',
+            ])->latest()->paginate(15);
+
+            $brands = Brand::orderBy('brand_name')->get();
+
+            return view('admin.manage-shoes', compact('shoes', 'brands'));
+        })->name('shoes.index');
+
+        Route::get('/shoes/{shoeId}', function (int $shoeId) {
+            $shoe = Shoe::with([
+                'brand',
+                'options',
+                'images',
+                'variations',
+                'variations.images',
+            ])->findOrFail($shoeId);
+
+            $brands = Brand::orderBy('brand_name')->get();
+
+            return view('admin.product', compact('shoe', 'brands'));
+        })->name('shoes.show');
+
+        Route::get('/brands', function () {
+            $brands = Brand::withCount('shoes')
+                ->orderBy('brand_name')
+                ->paginate(20);
+
+            return view('admin.brands', compact('brands'));
+        })->name('brands.index');
+
+        Route::post('/brands', [BrandController::class, 'createBrand'])->name('brands.store');
+        Route::put('/brands/{brandId}', [BrandController::class, 'updateBrand'])->name('brands.update');
+        Route::delete('/brands/{brandId}', [BrandController::class, 'deleteBrand'])->name('brands.destroy');
+
+        Route::get('/orders', function () {
+            $orders = Order::with(['user', 'items.variation.shoe.brand'])
+                ->latest()
+                ->paginate(15);
+
+            // Compute status summary with a DB query so it's correct even when paginated
+            $statusSummary = Order::select('status', DB::raw('count(*) as cnt'))
+                ->groupBy('status')
+                ->pluck('cnt', 'status')
+                ->toArray();
+
+            // Ensure keys exist for expected statuses
+            $expected = ['pending', 'paid', 'shipping', 'delivered', 'cancelled'];
+            $statusSummary = array_merge(array_fill_keys($expected, 0), $statusSummary);
+
+            return view('admin.orders', compact('orders', 'statusSummary'));
+        })->name('orders.index');
+
+        Route::put('/orders/{orderId}', [AdminController::class, 'updateOrder'])->name('orders.update');
+        Route::delete('/orders/{orderId}', [AdminController::class, 'deleteOrder'])->name('orders.destroy');
+
+        Route::get('/users', function () {
+            $users = User::latest()->paginate(20);
+
+            $roleSummary = User::select('role', DB::raw('count(*) as cnt'))
+                ->groupBy('role')
+                ->pluck('cnt', 'role')
+                ->toArray();
+
+            $roleSummary = array_merge(['admin' => 0, 'customer' => 0], $roleSummary);
+
+            return view('admin.users', compact('users', 'roleSummary'));
+        })->name('users.index');
+
+        Route::put('/users/{userId}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::delete('/users/{userId}', [AdminController::class, 'deleteUser'])->name('users.destroy');
+
+        Route::post('/shoes', [ShoeController::class, 'createShoe'])->name('shoes.store');
+        Route::put('/shoes/{shoeId}', [ShoeController::class, 'updateShoe'])->name('shoes.update');
+        Route::delete('/shoes/{shoeId}', [ShoeController::class, 'deleteShoe'])->name('shoes.destroy');
+        Route::post('/shoes/options', [ShoeController::class, 'createShoeOptions'])->name('shoes.options.store');
+        Route::put('/shoes/options/{optionId}', [ShoeController::class, 'updateOption'])->name('shoes.options.update');
+        Route::delete('/shoes/options/{optionId}', [ShoeController::class, 'deleteShoeOption'])->name('shoes.options.destroy');
+        Route::put('/shoes/variations/{variationId}', [ShoeController::class, 'updateSku'])->name('shoes.variations.update');
+        Route::delete('/shoes/variations/{variationId}', [ShoeController::class, 'deleteSku'])->name('shoes.variations.destroy');
+    });
 Route::get('/brands', [BrandController::class, 'getAllBrands']);
 Route::get('/shoes', [ShoeController::class, 'getAllShoes']);
 Route::get('/user/products/{shoeId}', [ShoeController::class, 'show'])->name('products.show');
@@ -36,21 +160,14 @@ Route::get('/shoes/search', [ShoeController::class, 'searchShoes']);
 Route::get('/shoes/brand/{brandId}', [ShoeController::class, 'getShoesByBrand']);
 Route::get('/shoes/{shoeId}/options', [ShoeController::class, 'getShoeOptions']);
 Route::get('/shoes/{id}', [ShoeController::class, 'getShoeById']);
-Route::get('/test-product/{shoeId}',[ShoeController::class, 'showAdminTestPage'])->name('test-product');
+Route::get('/test-product/{shoeId}', function (int $shoeId) {
+    return redirect()->route('admin.shoes.show', $shoeId);
+})->name('test-product');
 Route::get('/prototype-test/{shoe}', function (\App\Models\Shoe $shoe) {
     return view('prototype-test', compact('shoe'));
 });
 Route::get('/test-manage-shoes', function () {
-    $shoes = Shoe::with([
-        'brand',
-        'options',
-        'variations'
-    ])->get();
-
-    return view(
-        'test-manage-shoes',
-        compact('shoes')
-    );
+    return redirect()->route('admin.shoes.index');
 });
 Route::get('/payment/toyyibpay/return', function (Request $request) {
     $statusId = (string) $request->query('status_id');
@@ -65,7 +182,7 @@ Route::get('/payment/toyyibpay/return', function (Request $request) {
     $flashKey = $statusId === '3' ? 'failed' : 'success';
 
     return redirect()
-        ->route('test-payment')
+        ->route('user.payment')
         ->with($flashKey, $message)
         ->with('checkout_result', [
             'status_id' => $statusId,
@@ -117,4 +234,22 @@ VIEW
 */
 Route::view('/about', 'user.about')->name('about');
 Route::view('/test-create-shoes', 'test-create-shoes')->name('test-create-shoes');
-Route::view('/test-payment', 'test-payment')->name('test-payment');
+Route::middleware('auth')->get('/user/payment', function (Request $request) {
+    $user = $request->user();
+
+    return view('user.payment', [
+        'amount' => $request->query('amount', 500),
+        'subtotal' => $request->query('subtotal', 500),
+        'discountAmount' => $request->query('discount_amount', 0),
+        'shipping' => $request->query('shipping', 0),
+        'shippingMethod' => $request->query('shipping_method', 'standard'),
+        'paymentType' => $request->query('payment_type', 'FPX'),
+        'customerName' => $request->query('customer_name', $user?->name),
+        'customerEmail' => $request->query('customer_email', $user?->email),
+        'customerPhone' => $request->query('customer_phone', $user?->phone ?? ''),
+    ]);
+})->name('user.payment');
+
+Route::middleware('auth')->get('/test-payment', function () {
+    return redirect()->route('user.payment');
+});

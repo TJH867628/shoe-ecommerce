@@ -4,25 +4,25 @@
 
 @section('content')
 <div class="bg-slate-50 py-12">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-[70vh]">
-    
-    <!-- Page Header -->
-    <header class="mb-12 border-b border-stone-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-4xl font-bold text-stone-900 mb-2">My Wishlist</h1>
-            <p class="text-stone-500">Keep track of the sneakers you love.</p>
-        </div>
-        <div class="bg-stone-100 text-stone-600 py-2 px-5 rounded-full text-sm font-bold shadow-inner">
-            <span id="wishlist-count">{{ $wishlistItems->count() }}</span> Items Saved
-        </div>
-    </header>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-[70vh]">
 
-    <!-- Wishlist Grid -->
-    <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        
-        @forelse($wishlistItems as $item)
+        <!-- Page Header -->
+        <header class="mb-12 border-b border-stone-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-4xl font-bold text-stone-900 mb-2">My Wishlist</h1>
+                <p class="text-stone-500">Keep track of the sneakers you love.</p>
+            </div>
+            <div class="bg-stone-100 text-stone-600 py-2 px-5 rounded-full text-sm font-bold shadow-inner">
+                <span id="wishlist-count">{{ $wishlistItems->count() }}</span> Items Saved
+            </div>
+        </header>
+
+        <!-- Wishlist Grid -->
+        <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+            @forelse($wishlistItems as $item)
             <div class="wishlist-item bg-white rounded-3xl p-5 border border-stone-100 shadow-sm relative group hover:-translate-y-2 transition-all duration-300" data-shoe-id="{{ $item->product->id }}">
-                
+
                 <!-- Remove from Wishlist Button -->
                 <button type="button" class="remove-wishlist-btn absolute top-8 right-8 z-10 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 hover:scale-110 shadow-sm transition-all" title="Remove from wishlist">
                     <i class="fas fa-trash-alt text-sm"></i>
@@ -55,7 +55,7 @@
                 </form>
             </div>
 
-        @empty
+            @empty
             <!-- Empty State Layout -->
             <div class="col-span-full py-24 flex flex-col items-center justify-center text-center bg-stone-50/50 rounded-[3rem] border border-dashed border-stone-200">
                 <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-stone-300 shadow-sm mb-6 border border-stone-100">
@@ -67,10 +67,10 @@
                     Discover Footwear
                 </a>
             </div>
-        @endforelse
+            @endforelse
 
+        </div>
     </div>
-</div>
 </div>
 
 @section('scripts')
@@ -101,10 +101,10 @@
                         // Remove item with animation
                         item.style.opacity = '0';
                         item.style.transform = 'scale(0.95)';
-                        
+
                         setTimeout(() => {
                             item.remove();
-                            
+
                             // Update count
                             const countSpan = document.getElementById('wishlist-count');
                             const newCount = data.wishlist_count;

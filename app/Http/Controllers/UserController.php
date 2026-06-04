@@ -46,8 +46,13 @@ class UserController extends Controller
             // Regenerate session to prevent session fixation
             $request->session()->regenerate();
 
+            $user = Auth::user();
+            $redirectTo = $user?->role === 'admin'
+                ? route('admin.dashboard')
+                : url('/');
+
             return redirect()
-                ->intended(url('/'))
+                ->intended($redirectTo)
                 ->with('success', 'You have been logged in successfully!');
         }
 

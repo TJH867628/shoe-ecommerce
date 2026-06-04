@@ -52,31 +52,31 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             @forelse($trendingShoes as $shoe)
-                @php
-                    $coverImage = $shoe->images->firstWhere('is_cover', true)
-                        ?? $shoe->images->sortBy('sort_order')->first();
-                @endphp
-                <a href="{{ route('products.show', ['shoeId' => $shoe->id]) }}" class="group flex flex-col h-full text-left">
-                    <div class="relative aspect-square overflow-hidden bg-slate-100 rounded-3xl mb-4">
-                        <img src="{{ $coverImage?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image' }}" alt="{{ $shoe->shoe_name }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out" />
-                        <button class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-slate-400 hover:text-red-500 hover:scale-110 transition-all z-10 wishlist-btn" data-shoe-id="{{ $shoe->id }}" onclick="event.preventDefault()">
-                            <i class="far fa-heart"></i>
-                        </button>
+            @php
+            $coverImage = $shoe->images->firstWhere('is_cover', true)
+            ?? $shoe->images->sortBy('sort_order')->first();
+            @endphp
+            <a href="{{ route('products.show', ['shoeId' => $shoe->id]) }}" class="group flex flex-col h-full text-left">
+                <div class="relative aspect-square overflow-hidden bg-slate-100 rounded-3xl mb-4">
+                    <img src="{{ $coverImage?->image_path ?? 'https://via.placeholder.com/800x800?text=No+Image' }}" alt="{{ $shoe->shoe_name }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out" />
+                    <button class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-slate-400 hover:text-red-500 hover:scale-110 transition-all z-10 wishlist-btn" data-shoe-id="{{ $shoe->id }}" onclick="event.preventDefault()">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="grow flex flex-col">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $shoe->brand?->brand_name ?? 'Brand' }}</span>
+                    <h3 class="text-lg font-black text-slate-900 mb-1">{{ $shoe->shoe_name }}</h3>
+                    <div class="flex items-center gap-1 mb-2">
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <span class="text-sm font-bold text-slate-700">4.8</span>
                     </div>
-                    <div class="grow flex flex-col">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $shoe->brand?->brand_name ?? 'Brand' }}</span>
-                        <h3 class="text-lg font-black text-slate-900 mb-1">{{ $shoe->shoe_name }}</h3>
-                        <div class="flex items-center gap-1 mb-2">
-                            <i class="fas fa-star text-amber-400 text-sm"></i>
-                            <span class="text-sm font-bold text-slate-700">4.8</span>
-                        </div>
-                        <div class="mt-auto pt-2">
-                            <span class="text-xl font-black text-slate-900">RM{{ number_format($shoe->shoe_price, 2) }}</span>
-                        </div>
+                    <div class="mt-auto pt-2">
+                        <span class="text-xl font-black text-slate-900">RM{{ number_format($shoe->shoe_price, 2) }}</span>
                     </div>
-                </a>
+                </div>
+            </a>
             @empty
-                <p class="col-span-full text-center text-slate-500">No products available</p>
+            <p class="col-span-full text-center text-slate-500">No products available</p>
             @endforelse
         </div>
     </section>
@@ -137,7 +137,7 @@
         document.querySelectorAll('.wishlist-btn').forEach(btn => {
             const shoeId = parseInt(btn.getAttribute('data-shoe-id'));
             const icon = btn.querySelector('i');
-            
+
             if (wishlistState.has(shoeId)) {
                 icon.classList.remove('far');
                 icon.classList.add('fas');
@@ -157,12 +157,12 @@
             btn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const shoeId = parseInt(this.getAttribute('data-shoe-id'));
                 const isInWishlist = wishlistState.has(shoeId);
-                const route = isInWishlist 
-                    ? `/wishlist/remove/${shoeId}` 
-                    : `/wishlist/add/${shoeId}`;
+                const route = isInWishlist ?
+                    `/wishlist/remove/${shoeId}` :
+                    `/wishlist/add/${shoeId}`;
 
                 try {
                     const response = await fetch(route, {
@@ -175,7 +175,7 @@
                     });
 
                     const data = await response.json();
-                    
+
                     if (response.status === 401) {
                         alert('Please login to manage your wishlist');
                         window.location.href = '{{ route("login") }}';
