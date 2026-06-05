@@ -198,30 +198,6 @@
 
             const selectedOptions = {};
 
-            function getCompatibleVariations() {
-                return variations.filter(variation => {
-                    const attrs = variation.attributes || {};
-
-                    return Object.entries(selectedOptions).every(([key, value]) => {
-                        return String(attrs[key]) === String(value);
-                    });
-                });
-            }
-
-            function getAvailableValuesForOption(optionName) {
-                return new Set(
-                    getCompatibleVariations()
-                        .flatMap(variation => {
-                            const attrs = variation.attributes || {};
-                            const value = attrs[optionName];
-
-                            return value === undefined || value === null
-                                ? []
-                                : [String(value)];
-                        })
-                );
-            }
-
             function setMainImage(src) {
 
                 if (!src || !mainImage) {
@@ -273,7 +249,21 @@
                     Object.keys(selectedOptions).length;
 
                 const partialMatch =
-                    getCompatibleVariations()[0];
+                    variations.find(variation => {
+
+                        const attrs =
+                            variation.attributes || {};
+
+                        return Object.entries(
+                            selectedOptions
+                        ).every(([key, value]) => {
+
+                            return String(attrs[key])
+                                === String(value);
+
+                        });
+
+                    });
 
                 if (!partialMatch) {
 
@@ -310,80 +300,93 @@
                     return;
                 }
 
-                const exactMatch =
-                    selectedCount === totalOptionCount
-                        ? partialMatch
-                        : null;
-
-                if (!exactMatch || (exactMatch.stock_quantity ?? 0) <= 0) {
-
-                    variationInput.value = '';
-
-                    skuLabel.textContent = 'Unavailable';
-
-                    stockLabel.textContent =
-                        exactMatch?.stock_quantity ?? 0;
-
-                    addToCartButton.disabled = true;
-
-                    return;
-                }
-
                 variationInput.value =
-                    exactMatch.id;
+                    partialMatch.id;
 
                 skuLabel.textContent =
-                    exactMatch.sku_code ?? '-';
+                    partialMatch.sku_code ?? '-';
 
                 stockLabel.textContent =
-                    exactMatch.stock_quantity ?? 0;
+                    partialMatch.stock_quantity ?? 0;
 
                 addToCartButton.disabled = false;
 
                 if (
-                    exactMatch.images &&
-                    exactMatch.images.length
+                    partialMatch.images &&
+                    partialMatch.images.length
                 ) {
 
                     setMainImage(
-                        exactMatch.images[0]
+                        partialMatch.images[0]
                     );
 
                 }
             }
 
             function updateAvailability() {
+
                 optionButtons.forEach(button => {
-                    const option = button.dataset.option;
-                    const value = button.dataset.value;
-                    const isSelected = String(selectedOptions[option] ?? '') === String(value);
-                    const availableValues = getAvailableValuesForOption(option);
-                    const isAvailable = availableValues.has(String(value));
-                    const shouldDisable = !isSelected && !isAvailable;
 
-                    button.classList.toggle(
-                        'active',
-                        isSelected
-                    );
-                    button.classList.toggle(
-                        'border-slate-900',
-                        isSelected
-                    );
-                    button.classList.toggle(
-                        'border-2',
-                        isSelected
-                    );
-                    button.classList.toggle(
-                        'opacity-40',
-                        shouldDisable
-                    );
-                    button.classList.toggle(
-                        'cursor-not-allowed',
-                        shouldDisable
-                    );
+                    button.addEventListener('click', function () {
 
-                    button.disabled = shouldDisable;
-                });
+                        if (this.disabled) {
+                            return;
+                        }
+
+                        const option =
+                            this.dataset.option;
+
+                        const value =
+                            this.dataset.value;
+
+                        if (this.classList.contains('active')) {
+
+                            this.classList.remove(
+                                'active',
+                                'border-slate-900',
+                                'border-2'
+                            );
+
+                            delete selectedOptions[
+                                option
+                            ];
+
+                            updateAvailability();
+                            updateVariation();
+
+                            return;
+                        }
+
+                        document
+                            .querySelectorAll(
+                                `[data-option="${option}"]`
+                            )
+                            .forEach(btn => {
+
+                                btn.classList.remove(
+                                    'active',
+                                    'border-slate-900',
+                                    'border-2'
+                                );
+
+                            });
+
+                        this.classList.add(
+                            'active',
+                            'border-slate-900',
+                            'border-2'
+                        );
+
+                        selectedOptions[
+                            option
+                        ] = value;
+
+                        updateAvailability();
+                        updateVariation();
+
+                    });
+
+                }); 
             }
 
             optionButtons.forEach(button => {
@@ -402,16 +405,32 @@
                         const value =
                             this.dataset.value;
 
-                        if (
-                            String(selectedOptions[option] ?? '') ===
-                            String(value)
-                        ) {
-                            delete selectedOptions[option];
-                        } else {
-                            selectedOptions[option] = value;
-                        }
+                        document
+                            .querySelectorAll(
+                                `[data-option="${option}"]`
+                            )
+                            .forEach(btn => {
+
+                                btn.classList.remove(
+                                    'active',
+                                    'border-slate-900',
+                                    'border-2'
+                                );
+
+                            });
+
+                        this.classList.add(
+                            'active',
+                            'border-slate-900',
+                            'border-2'
+                        );
+
+                        selectedOptions[
+                            option
+                        ] = value;
 
                         updateAvailability();
+
                         updateVariation();
                     }
                 );

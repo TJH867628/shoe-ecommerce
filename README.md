@@ -20,7 +20,7 @@ composer install
 npm install
 ```
 
-### 3. Configure Environment
+### 3. Configure Environment  
 
 Copy the example environment file if needed:
 
@@ -79,6 +79,75 @@ Start the Laravel server:
 php artisan serve
 ```
 
+### 9. Set Up Xdebug for VSCode
+
+If you want to use VSCode breakpoints, install and enable Xdebug in your local PHP installation.
+
+#### Install Xdebug
+
+1. Confirm which PHP installation Laravel is using:
+
+```bash
+php -v
+php --ini
+```
+
+2. Enable Xdebug in your `php.ini` file. Add or update these settings:
+
+```ini
+zend_extension=xdebug
+
+[xdebug]
+xdebug.mode=debug
+xdebug.start_with_request=yes
+xdebug.client_host=127.0.0.1
+xdebug.client_port=9003
+```
+
+3. Restart the PHP server after saving `php.ini`:
+
+```bash
+php artisan serve
+```
+
+#### VSCode Setup
+
+This project includes a debug configuration at:
+
+- `.vscode/launch.json`
+
+It listens on port `9003` with the name `Listen for Xdebug`.
+
+If you need to create it manually, use this configuration:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Listen for Xdebug",
+      "type": "php",
+      "request": "launch",
+      "port": 9003
+    }
+  ]
+}
+```
+
+#### How to Use Xdebug
+
+1. Open the Laravel project in VSCode.
+2. Open a PHP file and click the left gutter to set a breakpoint.
+3. Start the `Listen for Xdebug` debugger in VSCode.
+4. Visit the page or submit the form in your browser.
+5. Execution will pause at the breakpoint when that code runs.
+
+#### Useful Notes
+
+- Make sure VSCode is listening before you reload the page.
+- If breakpoints do not stop, confirm the PHP process running `php artisan serve` is the same PHP installation that has Xdebug enabled.
+- A quick temporary alternative is `dd($variable)` or `dump($variable)` in Laravel code.
+
 ## Default Login Accounts
 
 - Customer
@@ -119,4 +188,3 @@ php artisan serve
 
 - The project uses Vite for frontend assets.
 - Product images may come from local storage or external URLs, depending on the data source.
-

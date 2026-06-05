@@ -16,7 +16,6 @@ class AdminController extends Controller
     public function index(Request $request)
     {
         $adminUser = $request->user();
-
         $stats = [
             ['label' => 'Total Users', 'value' => User::count(), 'note' => 'Registered accounts'],
             ['label' => 'Admin Accounts', 'value' => User::where('role', 'admin')->count(), 'note' => 'Privileged access'],
@@ -33,7 +32,6 @@ class AdminController extends Controller
         $recentUsers = User::latest()
             ->take(5)
             ->get();
-
         return view('admin.dashboard', compact('adminUser', 'stats', 'recentShoes', 'recentUsers'));
     }
 
