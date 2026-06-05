@@ -33,9 +33,6 @@ class AdminController extends Controller
         $recentUsers = User::latest()
             ->take(5)
             ->get();
-<<<<<<< Updated upstream
-        return view('admin.dashboard', compact('adminUser', 'stats', 'recentShoes', 'recentUsers'));
-=======
 
         $recentOrders = Order::with('user')
             ->latest()
@@ -74,7 +71,6 @@ class AdminController extends Controller
         $roleSummary = array_merge(['admin' => 0, 'customer' => 0], $roleSummary);
 
         return view('admin.users', compact('users', 'roleSummary'));
->>>>>>> Stashed changes
     }
 
     public function updateUser(Request $request, int $userId): RedirectResponse

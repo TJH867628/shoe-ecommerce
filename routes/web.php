@@ -51,7 +51,6 @@ Route::post('/checkout', [PaymentController::class, 'checkout'])->name('checkout
 Route::get('/payment/toyyibpay/return', [PaymentController::class, 'toyyibpayReturn'])->name('toyyibpay.return');
 Route::get('/payment/toyyibpay/callback', [PaymentController::class, 'toyyibpayCallback'])->name('toyyibpay.callback');
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('user.payment-success');
-
 /*
 |--------------------------------------------------------------------------
 | Catalog API Routes
