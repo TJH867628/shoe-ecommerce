@@ -255,26 +255,37 @@
                 quantityInput.value = safeQuantity;
             }
 
+            function getAttributeValue(attributes, optionName) {
+                if (!attributes) {
+                    return undefined;
+                }
+
+                if (Object.prototype.hasOwnProperty.call(attributes, optionName)) {
+                    return attributes[optionName];
+                }
+
+                const normalizedOptionName = String(optionName).toLowerCase();
+                const matchingKey = Object.keys(attributes).find(
+                    key => String(key).toLowerCase() === normalizedOptionName
+                );
+
+                return matchingKey ? attributes[matchingKey] : undefined;
+            }
+
+            function variationMatchesSelection(variation, selection) {
+                const attrs = variation.attributes || {};
+
+                return Object.entries(selection).every(([key, value]) => {
+                    return String(getAttributeValue(attrs, key)) === String(value);
+                });
+            }
+
             function updateVariation() {
                 const selectedCount =
                     Object.keys(selectedOptions).length;
 
                 const partialMatch =
-                    variations.find(variation => {
-
-                        const attrs =
-                            variation.attributes || {};
-
-                        return Object.entries(
-                            selectedOptions
-                        ).every(([key, value]) => {
-
-                            return String(attrs[key])
-                                === String(value);
-
-                        });
-
-                    });
+                    variations.find(variation => variationMatchesSelection(variation, selectedOptions));
 
                 if (!partialMatch) {
 
@@ -339,69 +350,20 @@
             }
 
             function updateAvailability() {
-
                 optionButtons.forEach(button => {
+                    const option = button.dataset.option;
+                    const value = button.dataset.value;
+                    const selection = {
+                        ...selectedOptions,
+                        [option]: value,
+                    };
 
-                    button.addEventListener('click', function () {
+                    const available = variations.some(variation => variationMatchesSelection(variation, selection));
 
-                        if (this.disabled) {
-                            return;
-                        }
-
-                        const option =
-                            this.dataset.option;
-
-                        const value =
-                            this.dataset.value;
-
-                        if (this.classList.contains('active')) {
-
-                            this.classList.remove(
-                                'active',
-                                'border-slate-900',
-                                'border-2'
-                            );
-
-                            delete selectedOptions[
-                                option
-                            ];
-
-                            updateAvailability();
-                            updateVariation();
-
-                            return;
-                        }
-
-                        document
-                            .querySelectorAll(
-                                `[data-option="${option}"]`
-                            )
-                            .forEach(btn => {
-
-                                btn.classList.remove(
-                                    'active',
-                                    'border-slate-900',
-                                    'border-2'
-                                );
-
-                            });
-
-                        this.classList.add(
-                            'active',
-                            'border-slate-900',
-                            'border-2'
-                        );
-
-                        selectedOptions[
-                            option
-                        ] = value;
-
-                        updateAvailability();
-                        updateVariation();
-
-                    });
-
-                }); 
+                    button.disabled = !available;
+                    button.classList.toggle('opacity-40', !available);
+                    button.classList.toggle('cursor-not-allowed', !available);
+                });
             }
 
             optionButtons.forEach(button => {
@@ -419,6 +381,23 @@
 
                         const value =
                             this.dataset.value;
+
+                        if (this.classList.contains('active')) {
+                            this.classList.remove(
+                                'active',
+                                'border-slate-900',
+                                'border-2'
+                            );
+
+                            delete selectedOptions[
+                                option
+                            ];
+
+                            updateAvailability();
+                            updateVariation();
+
+                            return;
+                        }
 
                         document
                             .querySelectorAll(

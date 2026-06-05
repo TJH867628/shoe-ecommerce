@@ -75,10 +75,10 @@ class DatabaseSeeder extends Seeder
                     ['url' => $shoeImages['Black'], 'cover' => true],
                 ],
                 'variations' => [
-                    ['attributes' => ['size' => 40, 'color' => 'Black'], 'stock' => 14, 'sku' => 'AMR-40-BLK'],
-                    ['attributes' => ['size' => 41, 'color' => 'Black'], 'stock' => 11, 'sku' => 'AMR-41-BLK'],
-                    ['attributes' => ['size' => 42, 'color' => 'Blue'], 'stock' => 8, 'sku' => 'AMR-42-BLU'],
-                    ['attributes' => ['size' => 43, 'color' => 'White'], 'stock' => 5, 'sku' => 'AMR-43-WHT'],
+                    ['attributes' => ['Size' => 40, 'Color' => 'Black'], 'stock' => 14, 'sku' => 'AMR-40-BLK'],
+                    ['attributes' => ['Size' => 41, 'Color' => 'Black'], 'stock' => 11, 'sku' => 'AMR-41-BLK'],
+                    ['attributes' => ['Size' => 42, 'Color' => 'Blue'], 'stock' => 8, 'sku' => 'AMR-42-BLU'],
+                    ['attributes' => ['Size' => 43, 'Color' => 'White'], 'stock' => 5, 'sku' => 'AMR-43-WHT'],
                 ],
             ],
             [
@@ -90,10 +90,10 @@ class DatabaseSeeder extends Seeder
                     ['url' => $shoeImages['White'], 'cover' => true],
                 ],
                 'variations' => [
-                    ['attributes' => ['size' => 40, 'color' => 'White'], 'stock' => 10, 'sku' => 'UBS-40-WHT'],
-                    ['attributes' => ['size' => 41, 'color' => 'White'], 'stock' => 12, 'sku' => 'UBS-41-WHT'],
-                    ['attributes' => ['size' => 42, 'color' => 'Grey'], 'stock' => 9, 'sku' => 'UBS-42-GRY'],
-                    ['attributes' => ['size' => 43, 'color' => 'Black'], 'stock' => 6, 'sku' => 'UBS-43-BLK'],
+                    ['attributes' => ['Size' => 40, 'Color' => 'White'], 'stock' => 10, 'sku' => 'UBS-40-WHT'],
+                    ['attributes' => ['Size' => 41, 'Color' => 'White'], 'stock' => 12, 'sku' => 'UBS-41-WHT'],
+                    ['attributes' => ['Size' => 42, 'Color' => 'Grey'], 'stock' => 9, 'sku' => 'UBS-42-GRY'],
+                    ['attributes' => ['Size' => 43, 'Color' => 'Black'], 'stock' => 6, 'sku' => 'UBS-43-BLK'],
                 ],
             ],
             [
@@ -105,10 +105,10 @@ class DatabaseSeeder extends Seeder
                     ['url' => $shoeImages['Red'], 'cover' => true],
                 ],
                 'variations' => [
-                    ['attributes' => ['size' => 39, 'color' => 'Red'], 'stock' => 7, 'sku' => 'RSX-39-RED'],
-                    ['attributes' => ['size' => 40, 'color' => 'Red'], 'stock' => 8, 'sku' => 'RSX-40-RED'],
-                    ['attributes' => ['size' => 41, 'color' => 'Black'], 'stock' => 9, 'sku' => 'RSX-41-BLK'],
-                    ['attributes' => ['size' => 42, 'color' => 'Grey'], 'stock' => 6, 'sku' => 'RSX-42-GRY'],
+                    ['attributes' => ['Size' => 39, 'Color' => 'Red'], 'stock' => 7, 'sku' => 'RSX-39-RED'],
+                    ['attributes' => ['Size' => 40, 'Color' => 'Red'], 'stock' => 8, 'sku' => 'RSX-40-RED'],
+                    ['attributes' => ['Size' => 41, 'Color' => 'Black'], 'stock' => 9, 'sku' => 'RSX-41-BLK'],
+                    ['attributes' => ['Size' => 42, 'Color' => 'Grey'], 'stock' => 6, 'sku' => 'RSX-42-GRY'],
                 ],
             ],
             [
@@ -120,10 +120,10 @@ class DatabaseSeeder extends Seeder
                     ['url' => $shoeImages['Grey'], 'cover' => true],
                 ],
                 'variations' => [
-                    ['attributes' => ['size' => 40, 'color' => 'Grey'], 'stock' => 4, 'sku' => 'NB990-40-GRY'],
-                    ['attributes' => ['size' => 41, 'color' => 'Grey'], 'stock' => 6, 'sku' => 'NB990-41-GRY'],
-                    ['attributes' => ['size' => 42, 'color' => 'Blue'], 'stock' => 5, 'sku' => 'NB990-42-BLU'],
-                    ['attributes' => ['size' => 43, 'color' => 'Black'], 'stock' => 3, 'sku' => 'NB990-43-BLK'],
+                    ['attributes' => ['Size' => 40, 'Color' => 'Grey'], 'stock' => 4, 'sku' => 'NB990-40-GRY'],
+                    ['attributes' => ['Size' => 41, 'Color' => 'Grey'], 'stock' => 6, 'sku' => 'NB990-41-GRY'],
+                    ['attributes' => ['Size' => 42, 'Color' => 'Blue'], 'stock' => 5, 'sku' => 'NB990-42-BLU'],
+                    ['attributes' => ['Size' => 43, 'Color' => 'Black'], 'stock' => 3, 'sku' => 'NB990-43-BLK'],
                 ],
             ],
             [
@@ -135,10 +135,10 @@ class DatabaseSeeder extends Seeder
                     ['url' => $shoeImages['Blue'], 'cover' => true],
                 ],
                 'variations' => [
-                    ['attributes' => ['size' => 40, 'color' => 'Blue'], 'stock' => 11, 'sku' => 'GEL-40-BLU'],
-                    ['attributes' => ['size' => 41, 'color' => 'Black'], 'stock' => 10, 'sku' => 'GEL-41-BLK'],
-                    ['attributes' => ['size' => 42, 'color' => 'White'], 'stock' => 7, 'sku' => 'GEL-42-WHT'],
-                    ['attributes' => ['size' => 43, 'color' => 'Red'], 'stock' => 5, 'sku' => 'GEL-43-RED'],
+                    ['attributes' => ['Size' => 40, 'Color' => 'Blue'], 'stock' => 11, 'sku' => 'GEL-40-BLU'],
+                    ['attributes' => ['Size' => 41, 'Color' => 'Black'], 'stock' => 10, 'sku' => 'GEL-41-BLK'],
+                    ['attributes' => ['Size' => 42, 'Color' => 'White'], 'stock' => 7, 'sku' => 'GEL-42-WHT'],
+                    ['attributes' => ['Size' => 43, 'Color' => 'Red'], 'stock' => 5, 'sku' => 'GEL-43-RED'],
                 ],
             ],
         ];
@@ -168,10 +168,17 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
-            DB::table('shoe_options')->updateOrInsert(
-                ['shoe_id' => $shoe->id],
-                ['option_name' => 'Size, Color', 'updated_at' => $now, 'created_at' => $now]
-            );
+            DB::table('shoe_options')
+                ->where('shoe_id', $shoe->id)
+                ->where('option_name', 'Size, Color')
+                ->delete();
+
+            foreach (['Size', 'Color'] as $optionName) {
+                DB::table('shoe_options')->updateOrInsert(
+                    ['shoe_id' => $shoe->id, 'option_name' => $optionName],
+                    ['updated_at' => $now, 'created_at' => $now]
+                );
+            }
 
             foreach ($shoeSeed['variations'] as $variationSeed) {
                 $variation = ShoeVariations::updateOrCreate(
@@ -188,7 +195,7 @@ class DatabaseSeeder extends Seeder
                 $primaryVariations[] = $variation;
 
                 DB::table('shoe_variation_images')->where('shoe_variation_id', $variation->id)->delete();
-                $variationColor = $variationSeed['attributes']['color'] ?? null;
+                $variationColor = $variationSeed['attributes']['Color'] ?? null;
                 DB::table('shoe_variation_images')->insert([
                     'shoe_variation_id' => $variation->id,
                     'image_path' => $shoeImages[$variationColor] ?? $shoeSeed['images'][0]['url'],
