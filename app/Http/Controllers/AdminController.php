@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -32,7 +33,48 @@ class AdminController extends Controller
         $recentUsers = User::latest()
             ->take(5)
             ->get();
+<<<<<<< Updated upstream
         return view('admin.dashboard', compact('adminUser', 'stats', 'recentShoes', 'recentUsers'));
+=======
+
+        $recentOrders = Order::with('user')
+            ->latest()
+            ->take(8)
+            ->get();
+
+        return view('admin.dashboard', compact('adminUser', 'stats', 'recentShoes', 'recentUsers', 'recentOrders'));
+    }
+
+    public function orders()
+    {
+        $orders = Order::with(['user', 'items.variation.shoe.brand'])
+            ->latest()
+            ->paginate(15);
+
+        $statusSummary = Order::select('status', DB::raw('count(*) as cnt'))
+            ->groupBy('status')
+            ->pluck('cnt', 'status')
+            ->toArray();
+
+        $expected = ['pending', 'paid', 'shipping', 'delivered', 'cancelled'];
+        $statusSummary = array_merge(array_fill_keys($expected, 0), $statusSummary);
+
+        return view('admin.orders', compact('orders', 'statusSummary'));
+    }
+
+    public function users()
+    {
+        $users = User::latest()->paginate(20);
+
+        $roleSummary = User::select('role', DB::raw('count(*) as cnt'))
+            ->groupBy('role')
+            ->pluck('cnt', 'role')
+            ->toArray();
+
+        $roleSummary = array_merge(['admin' => 0, 'customer' => 0], $roleSummary);
+
+        return view('admin.users', compact('users', 'roleSummary'));
+>>>>>>> Stashed changes
     }
 
     public function updateUser(Request $request, int $userId): RedirectResponse

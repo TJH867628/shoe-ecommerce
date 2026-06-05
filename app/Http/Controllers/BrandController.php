@@ -7,6 +7,15 @@ use App\Models\Brand;
 
 class BrandController extends Controller
 {
+    public function adminIndex()
+    {
+        $brands = Brand::withCount('shoes')
+            ->orderBy('brand_name')
+            ->paginate(20);
+
+        return view('admin.brands', compact('brands'));
+    }
+
     public function getAllBrands()
     {
         return Brand::all();

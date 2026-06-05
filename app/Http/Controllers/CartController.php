@@ -12,6 +12,7 @@ use App\Services\ShoeInventoryManager;
 use App\Observers\DiscountCalculator;
 use App\Observers\PriceDisplay;
 use App\Observers\ShippingCalculator;
+use InvalidArgumentException;
 
 class CartController extends Controller
 {
@@ -100,7 +101,11 @@ class CartController extends Controller
             'user_id' => $userId,
         ]);
 
-        $this->cartService->addItem($cart, $variation->id, (int) ($request->quantity ?? 1));
+        try {
+            $this->cartService->addItem($cart, $variation->id, (int) ($request->quantity ?? 1));
+        } catch (InvalidArgumentException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
 
         return back()->with(
             'success',
@@ -117,7 +122,11 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        $this->cartService->updateItem($item, $request->quantity);
+        try {
+            $this->cartService->updateItem($item, (int) $request->quantity);
+        } catch (InvalidArgumentException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
 
         return back()->with('success', 'Cart updated successfully.');
     }

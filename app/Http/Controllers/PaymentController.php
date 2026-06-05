@@ -17,6 +17,23 @@ use InvalidArgumentException;
 
 class PaymentController extends Controller
 {
+    public function paymentPage(Request $request)
+    {
+        $user = $request->user();
+
+        return view('user.payment', [
+            'amount' => $request->query('amount', 500),
+            'subtotal' => $request->query('subtotal', 500),
+            'discountAmount' => $request->query('discount_amount', 0),
+            'shipping' => $request->query('shipping', 0),
+            'shippingMethod' => $request->query('shipping_method', 'standard'),
+            'paymentType' => $request->query('payment_type', 'FPX'),
+            'customerName' => $request->query('customer_name', $user?->name),
+            'customerEmail' => $request->query('customer_email', $user?->email),
+            'customerPhone' => $request->query('customer_phone', $user?->phone ?? ''),
+        ]);
+    }
+
     public function checkout(Request $request)
     {
         $validated = $request->validate([

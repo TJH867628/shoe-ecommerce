@@ -53,7 +53,9 @@
                             $variation = $item->variation;
                             $shoe = $variation?->shoe;
                             $brand = $shoe?->brand;
-                            $cover = $shoe?->images->firstWhere('is_cover', true) ?? $shoe?->images->first();
+                            $cover = $variation?->images->first()
+                                ?? $shoe?->images->firstWhere('is_cover', true)
+                                ?? $shoe?->images->first();
                             @endphp
                             <div class="flex items-center gap-4 py-3 border-b last:border-b-0">
                                 <img src="{{ $cover?->image_path ? (str_starts_with($cover->image_path, 'http') ? $cover->image_path : asset('storage/' . $cover->image_path)) : 'https://via.placeholder.com/100' }}" class="w-16 h-16 rounded-lg object-cover" alt="{{ $shoe?->shoe_name }}" />

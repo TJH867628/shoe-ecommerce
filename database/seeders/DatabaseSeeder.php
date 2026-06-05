@@ -57,6 +57,14 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        $shoeImages = [
+            'Black' => 'images/seed-shoes/realistic-black.svg',
+            'Blue' => 'images/seed-shoes/realistic-blue.svg',
+            'White' => 'images/seed-shoes/realistic-white.svg',
+            'Grey' => 'images/seed-shoes/realistic-grey.svg',
+            'Red' => 'images/seed-shoes/realistic-red.svg',
+        ];
+
         $shoeCatalog = [
             [
                 'name' => 'Air Max Runner',
@@ -64,8 +72,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 499.00,
                 'description' => 'Lightweight runner with responsive cushioning for daily training and long walks.',
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
-                    ['url' => 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1200&q=80', 'cover' => false],
+                    ['url' => $shoeImages['Black'], 'cover' => true],
                 ],
                 'variations' => [
                     ['attributes' => ['size' => 40, 'color' => 'Black'], 'stock' => 14, 'sku' => 'AMR-40-BLK'],
@@ -80,8 +87,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 579.00,
                 'description' => 'Comfort-focused sneaker for everyday wear, commute days, and light workouts.',
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdbd62?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
-                    ['url' => 'https://images.unsplash.com/photo-1608379743498-0f3a9d7b9f28?auto=format&fit=crop&w=1200&q=80', 'cover' => false],
+                    ['url' => $shoeImages['White'], 'cover' => true],
                 ],
                 'variations' => [
                     ['attributes' => ['size' => 40, 'color' => 'White'], 'stock' => 10, 'sku' => 'UBS-40-WHT'],
@@ -96,7 +102,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 399.00,
                 'description' => 'Chunky retro-inspired sneaker with bold cushioning and a streetwear edge.',
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1542293787938-c9e299b880f4?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                    ['url' => $shoeImages['Red'], 'cover' => true],
                 ],
                 'variations' => [
                     ['attributes' => ['size' => 39, 'color' => 'Red'], 'stock' => 7, 'sku' => 'RSX-39-RED'],
@@ -111,7 +117,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 699.00,
                 'description' => 'Premium everyday trainer with elevated comfort and a classic running aesthetic.',
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                    ['url' => $shoeImages['Grey'], 'cover' => true],
                 ],
                 'variations' => [
                     ['attributes' => ['size' => 40, 'color' => 'Grey'], 'stock' => 4, 'sku' => 'NB990-40-GRY'],
@@ -126,7 +132,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 459.00,
                 'description' => 'Neutral running shoe with reliable shock absorption and lightweight support.',
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=80', 'cover' => true],
+                    ['url' => $shoeImages['Blue'], 'cover' => true],
                 ],
                 'variations' => [
                     ['attributes' => ['size' => 40, 'color' => 'Blue'], 'stock' => 11, 'sku' => 'GEL-40-BLU'],
@@ -170,21 +176,22 @@ class DatabaseSeeder extends Seeder
             foreach ($shoeSeed['variations'] as $variationSeed) {
                 $variation = ShoeVariations::updateOrCreate(
                     [
-                        'shoe_id' => $shoe->id,
-                        'attributes' => $variationSeed['attributes'],
+                        'sku_code' => $variationSeed['sku'],
                     ],
                     [
+                        'shoe_id' => $shoe->id,
+                        'attributes' => $variationSeed['attributes'],
                         'stock_quantity' => $variationSeed['stock'],
-                        'sku_code' => $variationSeed['sku'],
                     ]
                 );
 
                 $primaryVariations[] = $variation;
 
                 DB::table('shoe_variation_images')->where('shoe_variation_id', $variation->id)->delete();
+                $variationColor = $variationSeed['attributes']['color'] ?? null;
                 DB::table('shoe_variation_images')->insert([
                     'shoe_variation_id' => $variation->id,
-                    'image_path' => $shoeSeed['images'][0]['url'],
+                    'image_path' => $shoeImages[$variationColor] ?? $shoeSeed['images'][0]['url'],
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);

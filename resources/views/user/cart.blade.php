@@ -11,6 +11,18 @@
 			<p class="text-slate-500 mt-2">{{ count($cartItems) }} item{{ count($cartItems) !== 1 ? 's' : '' }} in your cart</p>
 		</div>
 
+		@if(session('success'))
+			<div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+				{{ session('success') }}
+			</div>
+		@endif
+
+		@if(session('error'))
+			<div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+				{{ session('error') }}
+			</div>
+		@endif
+
 		@if(count($cartItems) > 0)
 		<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 			<section class="xl:col-span-2">
@@ -19,11 +31,17 @@
 						@php
 							$shoe = $cartItem->variation->shoe;
 							$brand = $shoe?->brand;
-							$image = $shoe?->images->firstWhere('is_cover', true) ?? $shoe?->images->first();
+							$image = $cartItem->variation->images->first()
+								?? $shoe?->images->firstWhere('is_cover', true)
+								?? $shoe?->images->first();
+							$imageUrl = $image?->image_path
+								? (str_starts_with($image->image_path, 'http') ? $image->image_path : asset('storage/' . $image->image_path))
+								: 'https://via.placeholder.com/150';
 							$attributes = $cartItem->variation->attributes ?? [];
+							$stockQuantity = (int) ($cartItem->variation->stock_quantity ?? 0);
 						@endphp
 						<article class="p-5 sm:p-6 flex flex-col sm:flex-row gap-5 sm:items-center {{ !$loop->last ? 'border-b border-slate-100' : '' }}">
-							<img src="{{ $image?->image_path ?? 'https://via.placeholder.com/150' }}" alt="{{ $shoe?->shoe_name ?? 'Cart item' }}" class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-xl" />
+							<img src="{{ $imageUrl }}" alt="{{ $shoe?->shoe_name ?? 'Cart item' }}" class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-xl" />
 
 							<div class="flex-1 min-w-0">
 								<div class="flex items-start justify-between gap-4">
@@ -50,7 +68,7 @@
 										@method('PATCH')
 										<button type="submit" name="quantity" value="{{ max(1, $cartItem->quantity - 1) }}" class="px-3 py-1.5 text-slate-500 hover:bg-slate-100">-</button>
 										<span class="px-4 text-sm font-bold text-slate-900">{{ $cartItem->quantity }}</span>
-										<button type="submit" name="quantity" value="{{ $cartItem->quantity + 1 }}" class="px-3 py-1.5 text-slate-500 hover:bg-slate-100">+</button>
+										<button type="submit" name="quantity" value="{{ $cartItem->quantity + 1 }}" @disabled($cartItem->quantity >= $stockQuantity) class="px-3 py-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">+</button>
 									</form>
 
 									<form method="POST" action="{{ route('cart.remove', $cartItem) }}" class="inline">
@@ -83,9 +101,12 @@
 							@foreach($recommended as $rec)
 								@php
 									$cover = $rec->images->firstWhere('is_cover', true) ?? $rec->images->first();
+									$coverUrl = $cover?->image_path
+										? (str_starts_with($cover->image_path, 'http') ? $cover->image_path : asset('storage/' . $cover->image_path))
+										: 'https://via.placeholder.com/150';
 								@endphp
 								<a href="{{ route('products.show', $rec->id) }}" class="group rounded-xl border border-slate-200 p-3 flex items-center gap-3 hover:border-cyan-400 transition">
-									<img src="{{ $cover?->image_path ?? 'https://via.placeholder.com/150' }}" alt="{{ $rec->shoe_name }}" class="w-16 h-16 rounded-lg object-cover" />
+									<img src="{{ $coverUrl }}" alt="{{ $rec->shoe_name }}" class="w-16 h-16 rounded-lg object-cover" />
 									<div>
 										<p class="text-sm font-black text-slate-900 group-hover:text-cyan-700">{{ $rec->shoe_name }}</p>
 										<p class="text-xs text-slate-500">{{ $rec->brand?->brand_name ?? '' }}</p>

@@ -144,9 +144,6 @@
                                 <button type="submit" id="add-to-cart-btn"
                                     class="ml-auto bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-lg"
                                     disabled>Add to Cart</button>
-                                <button type="button" id="buy-now-btn"
-                                    class="ml-2 border border-slate-300 px-5 py-3 rounded-lg text-slate-700">Buy
-                                    Now</button>
                             </div>
 
                             <div class="text-sm text-slate-600">
@@ -244,6 +241,20 @@
                 addToCartButton.disabled = true;
             }
 
+            function getSelectedStockQuantity() {
+                return parseInt(stockLabel.textContent, 10) || 0;
+            }
+
+            function setQuantity(quantity) {
+                const maxStock = getSelectedStockQuantity();
+                const safeQuantity = maxStock > 0
+                    ? Math.min(Math.max(1, quantity), maxStock)
+                    : 1;
+
+                quantityDisplay.textContent = safeQuantity;
+                quantityInput.value = safeQuantity;
+            }
+
             function updateVariation() {
                 const selectedCount =
                     Object.keys(selectedOptions).length;
@@ -308,6 +319,10 @@
 
                 stockLabel.textContent =
                     partialMatch.stock_quantity ?? 0;
+
+                setQuantity(
+                    parseInt(quantityDisplay.textContent, 10) || 1
+                );
 
                 addToCartButton.disabled = false;
 
@@ -548,14 +563,7 @@
                                 10
                             ) || 1;
 
-                        const next =
-                            current + 1;
-
-                        quantityDisplay.textContent =
-                            next;
-
-                        quantityInput.value =
-                            next;
+                        setQuantity(current + 1);
 
                     }
                 );
@@ -580,11 +588,7 @@
                                 current - 1
                             );
 
-                        quantityDisplay.textContent =
-                            next;
-
-                        quantityInput.value =
-                            next;
+                        setQuantity(next);
 
                     }
                 );

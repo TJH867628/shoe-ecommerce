@@ -8,6 +8,7 @@ use App\Models\ShoeVariations;
 use App\Observers\DiscountCalculator;
 use App\Observers\PriceDisplay;
 use App\Observers\ShippingCalculator;
+use InvalidArgumentException;
 
 class CartService
 {
@@ -23,11 +24,25 @@ class CartService
      */
     public function addItem(Cart $cart, int $shoeVariationId, int $quantity): CartItem
     {
-        $cartItem = CartItem::create([
+        $matchingItems = CartItem::where('cart_id', $cart->id)
+            ->where('shoe_variation_id', $shoeVariationId)
+            ->get();
+
+        $cartItem = $matchingItems->first() ?? new CartItem([
             'cart_id' => $cart->id,
             'shoe_variation_id' => $shoeVariationId,
-            'quantity' => $quantity,
         ]);
+
+        $newQuantity = $matchingItems->sum('quantity') + $quantity;
+
+        $this->ensureStockIsAvailable($shoeVariationId, $newQuantity);
+
+        $cartItem->quantity = $newQuantity;
+        $cartItem->save();
+
+        if ($matchingItems->count() > 1) {
+            CartItem::whereIn('id', $matchingItems->skip(1)->pluck('id'))->delete();
+        }
 
         // Notify observers about the cart change
         $cart->notify();
@@ -40,6 +55,13 @@ class CartService
      */
     public function updateItem(CartItem $cartItem, int $quantity): CartItem
     {
+        $otherCartQuantity = CartItem::where('cart_id', $cartItem->cart_id)
+            ->where('shoe_variation_id', $cartItem->shoe_variation_id)
+            ->where('id', '!=', $cartItem->id)
+            ->sum('quantity');
+
+        $this->ensureStockIsAvailable($cartItem->shoe_variation_id, $quantity + $otherCartQuantity);
+
         $cartItem->update(['quantity' => $quantity]);
 
         // Notify observers about the cart change
@@ -103,5 +125,16 @@ class CartService
         $cart->notify();
 
         return $result > 0;
+    }
+
+    private function ensureStockIsAvailable(int $shoeVariationId, int $quantity): void
+    {
+        $variation = ShoeVariations::findOrFail($shoeVariationId);
+
+        if ($quantity > $variation->stock_quantity) {
+            throw new InvalidArgumentException(
+                "Only {$variation->stock_quantity} item(s) available for this shoe variation."
+            );
+        }
     }
 }

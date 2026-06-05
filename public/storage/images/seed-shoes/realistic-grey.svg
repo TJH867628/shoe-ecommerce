@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Grey sneaker product image</title>
+  <desc id="desc">Realistic studio-style grey sneaker on a light background</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#e2e8f0"/></linearGradient>
+    <linearGradient id="upper" x1="180" x2="900" y1="370" y2="600" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#64748b"/><stop offset=".45" stop-color="#cbd5e1"/><stop offset="1" stop-color="#334155"/></linearGradient>
+    <linearGradient id="sole" x1="150" x2="1050" y1="640" y2="760" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e2e8f0"/><stop offset="1" stop-color="#94a3b8"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="34" stdDeviation="24" flood-color="#0f172a" flood-opacity=".2"/></filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <ellipse cx="610" cy="735" rx="440" ry="56" fill="#0f172a" opacity=".11"/>
+  <g filter="url(#shadow)">
+    <path d="M154 548c146 24 254-6 357-70 70-44 129-107 196-130 55-19 106-2 156 39 55 45 99 101 153 145 38 30 82 48 130 55 24 3 34 31 19 51-54 72-135 110-245 118H268c-100 0-166-50-176-126-6-46 15-76 62-82z" fill="url(#upper)"/>
+    <path d="M233 530c102 5 190-20 276-76 74-48 129-101 190-122 43-15 82-2 122 30 48 39 89 94 137 135 39 33 85 55 142 66-43 30-108 49-193 55H279c-45 0-70-24-78-58-4-17 7-28 32-30z" fill="#f8fafc" opacity=".38"/>
+    <path d="M392 505c70-34 126-76 182-119 67 39 121 100 168 180H315c16-27 41-47 77-61z" fill="#94a3b8"/>
+    <path d="M453 472c76 10 140 11 222 4 15 13 29 28 43 45-94 13-190 13-288 2 7-17 15-34 23-51z" fill="#475569"/>
+    <path d="M586 388l-58 93m117-61l-58 93m119-62l-57 92" stroke="#f8fafc" stroke-width="18" stroke-linecap="round"/>
+    <path d="M138 620h988c-48 79-126 123-237 130H278c-82 0-133-46-140-130z" fill="url(#sole)"/>
+    <path d="M244 718h612c-29 35-78 53-147 53H346c-63 0-97-18-102-53z" fill="#334155"/>
+  </g>
+</svg>

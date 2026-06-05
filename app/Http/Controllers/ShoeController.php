@@ -18,6 +18,16 @@ use Illuminate\Support\Facades\Auth;
 
 class ShoeController extends Controller
 {
+    public function home()
+    {
+        $trendingShoes = Shoe::with(['brand', 'images', 'variations'])
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('main', compact('trendingShoes'));
+    }
+
     public function index()
     {
         $shoes = Shoe::with(['brand', 'images', 'variations'])
@@ -47,6 +57,35 @@ class ShoeController extends Controller
         }
 
         return view('user.product', compact('sampleProducts', 'brands', 'sizes', 'priceMin', 'priceMax'));
+    }
+
+    public function adminIndex()
+    {
+        $shoes = Shoe::with([
+            'brand',
+            'options',
+            'variations',
+            'images',
+        ])->latest()->paginate(15);
+
+        $brands = Brand::orderBy('brand_name')->get();
+
+        return view('admin.manage-shoes', compact('shoes', 'brands'));
+    }
+
+    public function adminShow(int $shoeId)
+    {
+        $shoe = Shoe::with([
+            'brand',
+            'options',
+            'images',
+            'variations',
+            'variations.images',
+        ])->findOrFail($shoeId);
+
+        $brands = Brand::orderBy('brand_name')->get();
+
+        return view('admin.product', compact('shoe', 'brands'));
     }
 
     public function show(int $shoeId)
