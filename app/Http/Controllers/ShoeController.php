@@ -474,24 +474,38 @@ class ShoeController extends Controller
     public function updateSku(Request $request, int $variationId)
     {
         $variation = ShoeVariations::findOrFail($variationId);
-        $attributes = $request->input('attributes', []);
+        $validated = $request->validate([
+            'attributes' => ['required', 'array'],
+            'attributes.*' => ['required', 'string', 'max:255'],
+            'stock' => ['required', 'integer', 'min:0'],
+        ]);
 
-        if ($this->hasDuplicateVariation($variation->shoe_id, $attributes, $variationId)) {
-
-            return back()->with(
-                'error',
-                'Another variation with the same attributes already exists.'
-            );
-        }
+        $attributes = $validated['attributes'];
 
         $allowedOptions = ShoeOption::where('shoe_id', $variation->shoe_id)
             ->pluck('option_name')
             ->toArray();
 
+        $normalizedAttributes = [];
+        foreach ($allowedOptions as $optionName) {
+            $submittedKey = collect(array_keys($attributes))
+                ->first(fn ($key) => strtolower($key) === strtolower($optionName));
+
+            if ($submittedKey === null) {
+                return back()->with(
+                    'error',
+                    "Missing option: {$optionName}"
+                );
+            }
+
+            $normalizedAttributes[$optionName] = $attributes[$submittedKey];
+        }
+
         foreach (array_keys($attributes) as $attributeName) {
+            $isAllowed = collect($allowedOptions)
+                ->contains(fn ($optionName) => strtolower($optionName) === strtolower($attributeName));
 
-            if (!in_array($attributeName, $allowedOptions)) {
-
+            if (!$isAllowed) {
                 return back()->with(
                     'error',
                     "Invalid option: {$attributeName}"
@@ -499,13 +513,21 @@ class ShoeController extends Controller
             }
         }
 
+        if ($this->hasDuplicateVariation($variation->shoe_id, $normalizedAttributes, $variationId)) {
+
+            return back()->with(
+                'error',
+                'Another variation with the same attributes already exists.'
+            );
+        }
+
         $shoe = Shoe::with('brand')->findOrFail($variation->shoe_id);
 
-        $skuCode = AdminShoeSkuBuilder::generateSkuCode($shoe, $attributes);
+        $skuCode = AdminShoeSkuBuilder::generateSkuCode($shoe, $normalizedAttributes);
 
         $variation->update([
-            'attributes' => $attributes,
-            'stock_quantity' => $request->stock,
+            'attributes' => $normalizedAttributes,
+            'stock_quantity' => $validated['stock'],
             'sku_code' => $skuCode
         ]);
 

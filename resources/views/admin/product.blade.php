@@ -395,24 +395,29 @@
                         <tr class="align-top">
                             <td class="px-4 py-4 font-black text-slate-900">{{ $variation->sku_code }}</td>
                             <td class="px-4 py-4 text-slate-600">
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach(($variation->attributes ?? []) as $key => $value)
-                                        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
-                                            <strong>{{ $key }}:</strong> {{ $value }}
-                                        </span>
+                                <div class="grid gap-3 md:grid-cols-2">
+                                    @foreach ($shoe->options as $option)
+                                        @php
+                                            $variationAttributes = $variation->attributes ?? [];
+                                            $optionKey = collect(array_keys($variationAttributes))
+                                                ->first(fn ($key) => strtolower($key) === strtolower($option->option_name));
+                                            $optionValue = $optionKey ? $variationAttributes[$optionKey] : '';
+                                        @endphp
+                                        <label class="block">
+                                            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{{ $option->option_name }}</span>
+                                            <input
+                                                form="update-sku-{{ $variation->id }}"
+                                                type="text"
+                                                name="attributes[{{ $option->option_name }}]"
+                                                value="{{ $optionValue }}"
+                                                class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-slate-900"
+                                            >
+                                        </label>
                                     @endforeach
                                 </div>
                             </td>
                             <td class="px-4 py-4 text-slate-600">
-                                <form action="{{ route('admin.shoes.variations.update', $variation->id) }}" method="POST" class="space-y-3 max-w-40">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="number" name="stock" value="{{ $variation->stock_quantity }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900">
-                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors">
-                                        <i class="fas fa-pen-to-square"></i>
-                                        Save
-                                    </button>
-                                </form>
+                                <input form="update-sku-{{ $variation->id }}" type="number" name="stock" min="0" value="{{ $variation->stock_quantity }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900">
                             </td>
                             <td class="px-4 py-4 text-slate-600">
                                 <form action="/shoe-variations/{{ $variation->id }}/images" method="POST" enctype="multipart/form-data" class="space-y-3">
@@ -450,7 +455,15 @@
                                     <p class="mt-3 text-xs text-slate-500">No images.</p>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 align-top">
+                            <td class="px-4 py-4 align-top space-y-3">
+                                <form id="update-sku-{{ $variation->id }}" action="{{ route('admin.shoes.variations.update', $variation->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                </form>
+                                <button form="update-sku-{{ $variation->id }}" type="submit" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors">
+                                    <i class="fas fa-pen-to-square"></i>
+                                    Save
+                                </button>
                                 <form action="/shoe-variations/{{ $variation->id }}" method="POST" onsubmit="return confirm('Delete this variation?')">
                                     @csrf
                                     @method('DELETE')
