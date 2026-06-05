@@ -142,18 +142,11 @@
 						'customer_phone' => auth()->user()?->phone,
 					]) }}" class="mt-6 w-full inline-flex items-center justify-center py-3 rounded-xl bg-slate-900 text-white font-black hover:bg-slate-800 transition">Proceed to Checkout</a>
 
-					<div class="mt-5 p-4 rounded-xl bg-cyan-50 border border-cyan-100">
-						<p class="text-xs font-bold text-cyan-700 uppercase tracking-wider">Promo Code</p>
-						<div class="mt-2 flex gap-2">
-							<input type="text" placeholder="Enter code" class="w-full px-3 py-2 rounded-lg border border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-300" />
-							<button type="button" class="px-4 py-2 rounded-lg bg-cyan-700 text-white text-sm font-bold">Apply</button>
-						</div>
-					</div>
 
-					{{-- Observer Pattern Status --}}
+					{{-- ToyyibPay Support Status --}}
 					<div class="mt-5 p-3 rounded-lg bg-blue-50 border border-blue-200">
-						<p class="text-xs font-bold text-blue-700">✨ Observer Pattern Active</p>
-						<p class="text-xs text-blue-600 mt-1">Prices calculated by discount, shipping & display observers</p>
+						<p class="text-xs font-bold text-blue-700">✨ ToyyibPay Supported</p>
+						<p class="text-xs text-blue-600 mt-1">Secure online payments are available through ToyyibPay</p>
 					</div>
 				</div>
 			</aside>

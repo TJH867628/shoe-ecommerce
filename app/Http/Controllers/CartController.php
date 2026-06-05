@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Cart;
 use App\Models\CartItem;
-use App\Models\ShoeVariations;
 use App\Models\Shoe;
 use App\Services\CartService;
+use App\Services\ShoeInventoryManager;
 use App\Observers\DiscountCalculator;
 use App\Observers\PriceDisplay;
 use App\Observers\ShippingCalculator;
@@ -74,14 +74,13 @@ class CartController extends Controller
             'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $variation = ShoeVariations::where('shoe_id', $request->shoe_id)
-            ->whereKey($request->variation_id)
-            ->first();
+        $inventoryManager = ShoeInventoryManager::getInstance();
+        $variation = $inventoryManager->findAvailableVariation(
+            (int) $request->shoe_id,
+            (int) $request->variation_id
+        );
 
-        if (
-            !$variation ||
-            $variation->stock_quantity <= 0
-        ) {
+        if (! $variation) {
 
             return back()->with(
                 'error',

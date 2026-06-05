@@ -3,6 +3,7 @@
 namespace App\Adapters;
 
 use App\Contracts\ToyyibPayPaymentMethod;
+use App\Services\ToyyibPayConfig;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -16,9 +17,10 @@ class ToyyibPayPaymentAdapter
 
     public function createCheckoutPayload(float $amount, array $customer = []): array
     {
-        $secretKey = "2syf8kwx-ouwa-49cl-nzll-w4mkkeg4edix";
-        $categoryCode = "3a4pwn1b";
-        $baseUrl = "https://dev.toyyibpay.com";
+        $toyyibPayConfig = ToyyibPayConfig::getInstance();
+        $secretKey = $toyyibPayConfig->getSecretKey();
+        $categoryCode = $toyyibPayConfig->getCategoryCode();
+        $baseUrl = $toyyibPayConfig->getBaseUrl();
         $returnUrl = $customer['return_url'] ?? route('toyyibpay.return');
         $callbackUrl = $customer['callback_url'] ?? route('toyyibpay.callback');
 
