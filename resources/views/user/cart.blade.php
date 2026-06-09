@@ -166,8 +166,8 @@
 
 					{{-- ToyyibPay Support Status --}}
 					<div class="mt-5 p-3 rounded-lg bg-blue-50 border border-blue-200">
-						<p class="text-xs font-bold text-blue-700">✨ ToyyibPay Supported</p>
-						<p class="text-xs text-blue-600 mt-1">Secure online payments are available through ToyyibPay</p>
+						<p class="text-xs font-bold text-blue-700">✨ ToyyibPay/Stripe Checkout Supported</p>
+						<p class="text-xs text-blue-600 mt-1">Secure online payments are available through ToyyibPay and Stripe</p>
 					</div>
 				</div>
 			</aside>

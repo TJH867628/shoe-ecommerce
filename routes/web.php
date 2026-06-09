@@ -50,6 +50,8 @@ Route::get('/user/payment', [PaymentController::class, 'paymentPage'])->middlewa
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
 Route::get('/payment/toyyibpay/return', [PaymentController::class, 'toyyibpayReturn'])->name('toyyibpay.return');
 Route::get('/payment/toyyibpay/callback', [PaymentController::class, 'toyyibpayCallback'])->name('toyyibpay.callback');
+Route::get('/payment/stripe/success', [PaymentController::class, 'stripeSuccess'])->middleware('auth')->name('stripe.success');
+Route::get('/payment/stripe/cancel', [PaymentController::class, 'stripeCancel'])->middleware('auth')->name('stripe.cancel');
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('user.payment-success');
 /*
 |--------------------------------------------------------------------------

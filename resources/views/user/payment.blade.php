@@ -166,7 +166,7 @@
     <div class="page">
         <div class="header">
             <h1>Checkout</h1>
-            <p>Review your order, choose a payment method, and continue to ToyyibPay sandbox.</p>
+            <p>Review your order and continue securely with ToyyibPay FPX or Stripe Card Checkout.</p>
         </div>
 
         <div class="grid">
@@ -185,7 +185,7 @@
                         <label for="payment_type">Payment Method</label>
                         <select id="payment_type" name="payment_type" required>
                             <option value="FPX" @selected(old('payment_type', $paymentType ?? 'FPX' )==='FPX' )>FPX</option>
-                            <option value="Card" @selected(old('payment_type', $paymentType ?? '' )==='Card' )>Card</option>
+                            <option value="Card" @selected(old('payment_type', $paymentType ?? '' )==='Card' )>Card (Stripe)</option>
                         </select>
                     </div>
 
@@ -244,12 +244,13 @@
             <div class="panel">
                 <h2 class="section-title">Order summary</h2>
                 <div class="summary-box">
+                    <p><strong>Amount:</strong> RM {{ number_format((float) ($amount ?? 500), 2) }}</p>
                     <p><strong>Subtotal:</strong> RM {{ number_format((float) ($subtotal ?? 500), 2) }}</p>
                     <p><strong>Discount:</strong> RM {{ number_format((float) ($discountAmount ?? 0), 2) }}</p>
                     <p><strong>Shipping:</strong> RM {{ number_format((float) ($shipping ?? 0), 2) }}</p>
                     <p><strong>Shipping Method:</strong> {{ ucfirst($shippingMethod ?? 'standard') }}</p>
-                    <p><strong>Payment:</strong> ToyyibPay sandbox</p>
-                    <p><strong>Methods:</strong> FPX or Card</p>
+                    <p><strong>FPX:</strong> ToyyibPay sandbox</p>
+                    <p><strong>Card:</strong> Stripe Checkout</p>
                 </div>
             </div>
         </div>

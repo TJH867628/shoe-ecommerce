@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Adapters\StripeCheckoutAdapter;
 use App\Adapters\ToyyibPayPaymentAdapter;
 use App\Factory\FPXFactory;
-use App\Factory\CardFactory;
 use App\Factory\PaymentFactory;
 use Illuminate\Http\Request;
 use App\Models\Order;
@@ -12,8 +12,8 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Cart;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use InvalidArgumentException;
+use RuntimeException;
 
 class PaymentController extends Controller
 {
@@ -81,6 +81,34 @@ class PaymentController extends Controller
             'payment_method' => $validated['payment_type'],
         ]);
 
+        if ($validated['payment_type'] === 'Card') {
+            try {
+                $stripeSession = (new StripeCheckoutAdapter())->createCheckoutSession(
+                    (float) $validated['amount'],
+                    $order->id,
+                    $paymentRecord->id,
+                    $validated['customer_email'] ?? $request->user()?->email
+                );
+
+                $paymentRecord->update([
+                    'bill_code' => $stripeSession['id'],
+                    'callback_data' => $stripeSession,
+                ]);
+
+                return redirect()->away($stripeSession['url']);
+            } catch (RuntimeException $exception) {
+                $paymentRecord->update([
+                    'payment_status' => 'failed',
+                    'callback_data' => ['error' => $exception->getMessage()],
+                ]);
+                $order->update(['status' => 'cancelled']);
+
+                return back()
+                    ->withInput()
+                    ->with('failed', $exception->getMessage());
+            }
+        }
+
         $factory = $this->resolveFactory($validated['payment_type']);
         $payment = $factory->createPayment();
         $adapter = new ToyyibPayPaymentAdapter($payment);
@@ -101,7 +129,82 @@ class PaymentController extends Controller
             ->with('checkout_payload', $payload);
     }
 
+    public function stripeSuccess(Request $request)
+    {
+        $sessionId = (string) $request->query('session_id');
 
+        if (! $sessionId) {
+            return redirect()
+                ->route('user.payment-success')
+                ->with('failed', 'Stripe checkout session was not provided.');
+        }
+
+        try {
+            $session = (new StripeCheckoutAdapter())->retrieveCheckoutSession($sessionId);
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('user.payment-success')
+                ->with('failed', $exception->getMessage());
+        }
+
+        $paymentId = (int) data_get($session, 'metadata.payment_id');
+        $payment = Payment::with('order')->find($paymentId);
+
+        $isValidPayment = $payment
+            && $payment->bill_code === $sessionId
+            && (int) data_get($session, 'metadata.order_id') === $payment->order_id
+            && $payment->order->user_id === auth()->id()
+            && (int) ($session['amount_total'] ?? 0) === (int) round($payment->payment_amount * 100)
+            && ($session['payment_status'] ?? null) === 'paid';
+
+        if (! $isValidPayment) {
+            return redirect()
+                ->route('user.payment-success')
+                ->with('failed', 'Stripe payment could not be verified.');
+        }
+
+        $this->markPaymentSuccessful(
+            $payment,
+            $session['payment_intent'] ?? $sessionId,
+            $session
+        );
+
+        return redirect()
+            ->route('user.payment-success')
+            ->with('success', 'Stripe card payment completed successfully.')
+            ->with('checkout_result', [
+                'status_id' => '1',
+                'billcode' => $sessionId,
+                'order_id' => $payment->order_id,
+            ]);
+    }
+
+    public function stripeCancel(Request $request)
+    {
+        $orderId = (int) $request->query('order_id');
+        $payment = Payment::with('order')
+            ->where('order_id', $orderId)
+            ->where('payment_method', 'Card')
+            ->whereHas('order', fn ($query) => $query->where('user_id', auth()->id()))
+            ->first();
+
+        if ($payment && $payment->payment_status !== 'success') {
+            $payment->update([
+                'payment_status' => 'failed',
+                'callback_data' => ['cancelled' => true],
+            ]);
+            $payment->order->update(['status' => 'cancelled']);
+        }
+
+        return redirect()
+            ->route('user.payment-success')
+            ->with('failed', 'Stripe card payment was cancelled.')
+            ->with('checkout_result', [
+                'status_id' => '3',
+                'billcode' => $payment?->bill_code,
+                'order_id' => $orderId ?: null,
+            ]);
+    }
 
     private function updateToyyibPayPayment(Request $request): bool
     {
@@ -124,25 +227,11 @@ class PaymentController extends Controller
         }
 
         if ($statusId === '1') {
-            $alreadySuccessful = $payment->payment_status === 'success';
-
-            $payment->update([
-                'payment_status' => 'success',
-                'transaction_id' => $request->input('transaction_id'),
-                'callback_data' => $request->all(),
-                'paid_at' => $payment->paid_at ?? now(),
-            ]);
-
-            $payment->order->update([
-                'status' => 'paid',
-            ]);
-
-            if (!$alreadySuccessful) {
-                Cart::where('user_id', $payment->order->user_id)
-                    ->first()
-                        ?->items()
-                    ->delete();
-            }
+            $this->markPaymentSuccessful(
+                $payment,
+                $request->input('transaction_id'),
+                $request->all()
+            );
 
             return true;
         }
@@ -223,9 +312,29 @@ class PaymentController extends Controller
     {
         return match ($paymentType) {
             'FPX' => new FPXFactory(),
-            'Card' => new CardFactory(),
             default => throw new InvalidArgumentException('Invalid Payment Type'),
         };
+    }
+
+    private function markPaymentSuccessful(Payment $payment, ?string $transactionId, array $callbackData): void
+    {
+        $alreadySuccessful = $payment->payment_status === 'success';
+
+        $payment->update([
+            'payment_status' => 'success',
+            'transaction_id' => $transactionId,
+            'callback_data' => $callbackData,
+            'paid_at' => $payment->paid_at ?? now(),
+        ]);
+
+        $payment->order->update(['status' => 'paid']);
+
+        if (! $alreadySuccessful) {
+            Cart::where('user_id', $payment->order->user_id)
+                ->first()
+                ?->items()
+                ->delete();
+        }
     }
 
     private function normalizeMalaysiaPhoneNumber(string $phone): string
