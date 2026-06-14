@@ -18,9 +18,6 @@
 
         <!-- Icons -->
         <div class="flex items-center gap-4">
-            <button class="hidden sm:inline-flex w-10 h-10 items-center justify-center text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-                <i class="fas fa-search"></i>
-            </button>
 
             @auth
             <!-- User Menu Dropdown -->
