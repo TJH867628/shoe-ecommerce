@@ -306,7 +306,13 @@ class ShoeController extends Controller
     public function createShoeOptions(Request $request)
     {
         $options = [];
-        foreach ($request->option_names as $optionName) {
+        $optionNames = array_filter($request->option_names ?? [], fn ($optionName) => trim((string) $optionName) !== '');
+
+        if (empty($optionNames)) {
+            return back()->with('error', 'Please enter an option name.');
+        }
+
+        foreach ($optionNames as $optionName) {
             if ($this->hasOption($request->shoe_id, $optionName)) {
                 return back()->with('error', 'This options already exist for this shoe.');
             }
@@ -361,12 +367,33 @@ class ShoeController extends Controller
     {
 
         try {
-            $director = new ShoeSkuDirector(new AdminShoeSkuBuilder());
+            $optionNames = ShoeOption::where('shoe_id', $request->shoe_id)
+                ->pluck('option_name')
+                ->toArray();
 
-            foreach ($request->skus as $sku) {
+            if (empty($optionNames)) {
+                return back()->with('error', 'Add at least one option before creating a SKU.');
+            }
+
+            $director = new ShoeSkuDirector(new AdminShoeSkuBuilder());
+            $skus = $request->skus ?? [];
+
+            if (empty($skus)) {
+                return back()->with('error', 'Please enter SKU option values.');
+            }
+
+            foreach ($skus as $sku) {
+                $attributes = array_filter($sku['attributes'] ?? [], fn ($attribute) => trim((string) $attribute) !== '');
+
+                foreach ($optionNames as $optionName) {
+                    if (!isset($attributes[$optionName])) {
+                        return back()->with('error', 'Please enter all SKU option values.');
+                    }
+                }
+
                 $variationData = $director->buildSku(
                     $request->shoe_id,
-                    $sku['attributes'],
+                    $attributes,
                     $sku['stock'] ?? 0
                 );
 
@@ -430,13 +457,41 @@ class ShoeController extends Controller
     public function updateOption(Request $request, int $optionId)
     {
         $option = ShoeOption::findOrFail($optionId);
-        if ($this->hasOption($option->shoe_id, $request->option_name)) {
+        $optionName = trim((string) $request->option_name);
+
+        if ($optionName === '') {
+            return back()->with('error', 'Please enter an option name.');
+        }
+
+        $hasOption = ShoeOption::where('shoe_id', $option->shoe_id)
+            ->where('option_name', $optionName)
+            ->where('id', '!=', $option->id)
+            ->exists();
+
+        if ($hasOption) {
             return back()->with('error', 'This options already exist for this shoe.');
         }
 
+        $oldOptionName = $option->option_name;
+
         $option->update([
-            'option_name' => $request->option_name
+            'option_name' => $optionName
         ]);
+
+        if ($oldOptionName !== $optionName) {
+            ShoeVariations::where('shoe_id', $option->shoe_id)->get()->each(function (ShoeVariations $variation) use ($oldOptionName, $optionName) {
+                $attributes = $variation->attributes;
+
+                if (isset($attributes[$oldOptionName])) {
+                    $attributes[$optionName] = $attributes[$oldOptionName];
+                    unset($attributes[$oldOptionName]);
+
+                    $variation->update([
+                        'attributes' => $attributes
+                    ]);
+                }
+            });
+        }
 
         return back()->with('success', 'Option updated successfully.');
     }
@@ -498,7 +553,16 @@ class ShoeController extends Controller
                 );
             }
 
-            $normalizedAttributes[$optionName] = $attributes[$submittedKey];
+            $attributeValue = trim((string) $attributes[$submittedKey]);
+
+            if ($attributeValue === '') {
+                return back()->with(
+                    'error',
+                    "Missing option: {$optionName}"
+                );
+            }
+
+            $normalizedAttributes[$optionName] = $attributeValue;
         }
 
         foreach (array_keys($attributes) as $attributeName) {
