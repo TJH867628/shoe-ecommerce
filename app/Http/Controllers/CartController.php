@@ -9,6 +9,8 @@ use App\Models\CartItem;
 use App\Models\Shoe;
 use App\Services\CartService;
 use App\Services\ShoeInventoryManager;
+use App\Services\Builders\Builders\CustomerShoeBuilder;
+use App\Services\Builders\Directors\CustomerShoeDirector;
 use App\Observers\DiscountCalculator;
 use App\Observers\PriceDisplay;
 use App\Observers\ShippingCalculator;
@@ -101,8 +103,18 @@ class CartController extends Controller
             'user_id' => $userId,
         ]);
 
+        $director = new CustomerShoeDirector(new CustomerShoeBuilder());
+        $selectedProduct = $director->buildProduct(array_merge([
+            'shoe_id' => (string) $request->shoe_id,
+            'variation_id' => (string) $variation->id,
+            'quantity' => (string) ($request->quantity ?? 1),
+            'sku_code' => (string) $variation->sku_code,
+        ], array_map('strval', $variation->attributes ?? [])));
+
+        $selectedAttributes = $selectedProduct->attributes;
+
         try {
-            $this->cartService->addItem($cart, $variation->id, (int) ($request->quantity ?? 1));
+            $this->cartService->addItem($cart, (int) $selectedAttributes['variation_id'], (int) $selectedAttributes['quantity']);
         } catch (InvalidArgumentException $exception) {
             return back()->with('error', $exception->getMessage());
         }
