@@ -22,12 +22,7 @@ class ShoeDirector
         $this->builder = $builder;
     }
 
-    public function buildShoe(
-        int $brandId,
-        string $shoeName,
-        string $description,
-        float $price
-    )
+    public function buildShoe(int $brandId, string $shoeName, string $description,float $price)
     {
         $this->builder->reset();
 
