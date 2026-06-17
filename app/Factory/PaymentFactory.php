@@ -8,10 +8,10 @@ abstract class PaymentFactory
 {
     abstract public function createPayment(): Payment;
 
-    public function processPayment(float $amount)
+    public function processPayment(float $amount, array $data = [])
     {
         $payment = $this->createPayment();
 
-        return $payment->pay($amount);
+        return $payment->pay($amount, $data);
     }
 }

@@ -2,11 +2,26 @@
 //Concrete Product
 namespace App\Payments;
 
+use App\Adapters\ToyyibPayPaymentAdapter;
+
 class FPXPayment implements Payment
 {
-    public function pay(float $amount)
+    public function pay(float $amount, array $data = []): array
     {
-        return "Paid RM " . number_format($amount, 2) . " using FPX.";
+        $paymentResult = "FPX payment processed successfully for RM " . number_format($amount, 2) . ".";
+        $customer = array_merge([
+            'bill_name' => $this->methodLabel(),
+            'bill_description' => $paymentResult,
+        ], $data['customer'] ?? []);
+
+        $payload = (new ToyyibPayPaymentAdapter($this))->createCheckoutPayload($amount, $customer);
+
+        return [
+            'gateway' => 'ToyyibPay',
+            'bill_code' => $payload['bill_code'],
+            'redirect_url' => $payload['redirect_url'],
+            'callback_data' => $payload,
+        ];
     }
 
     public function driverCode(): string
