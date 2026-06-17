@@ -11,7 +11,7 @@ class CardPayment implements Payment
 
     public function driverCode(): string
     {
-        return 'CreditCard';
+        return 'Card';
     }
 
     public function methodLabel(): string

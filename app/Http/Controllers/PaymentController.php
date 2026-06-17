@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Adapters\PaymentAdapter;
 use App\Adapters\StripeCheckoutAdapter;
-use App\Adapters\ToyyibPayPaymentAdapter;
+use App\Factory\CardFactory;
 use App\Factory\FPXFactory;
 use App\Factory\PaymentFactory;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use App\Models\Cart;
 use Illuminate\Http\JsonResponse;
 use InvalidArgumentException;
 use RuntimeException;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -74,54 +76,47 @@ class PaymentController extends Controller
             ]);
         }
 
+        $factory = $this->resolveFactory($validated['payment_type']);
+        $payment = $factory->createPayment();
+        $paymentMethod = $payment->driverCode();
+
         $paymentRecord = Payment::create([
             'order_id' => $order->id,
             'payment_amount' => $validated['amount'],
             'payment_status' => 'pending',
-            'payment_method' => $validated['payment_type'],
+            'payment_method' => $paymentMethod,
         ]);
 
-        if ($validated['payment_type'] === 'Card') {
-            try {
-                $stripeSession = (new StripeCheckoutAdapter())->createCheckoutSession(
-                    (float) $validated['amount'],
-                    $order->id,
-                    $paymentRecord->id,
-                    $validated['customer_email'] ?? $request->user()?->email
-                );
+        $adapter = new PaymentAdapter($payment);
 
-                $paymentRecord->update([
-                    'bill_code' => $stripeSession['id'],
-                    'callback_data' => $stripeSession,
-                ]);
+        try {
+            $payload = $adapter->createBill([
+                'amount' => (float) $validated['amount'],
+                'order_id' => $order->id,
+                'payment_id' => $paymentRecord->id,
+                'customer_email' => $validated['customer_email'] ?? $request->user()?->email,
+                'customer' => [
+                    'name' => $validated['customer_name'] ?? $request->user()?->name,
+                    'email' => $validated['customer_email'] ?? $request->user()?->email,
+                    'phone' => $phone,
+                    'reference' => 'CHK-' . now()->format('YmdHis'),
+                ],
+            ]);
+        } catch (RuntimeException|InvalidArgumentException $exception) {
+            $paymentRecord->update([
+                'payment_status' => 'failed',
+                'callback_data' => ['error' => $exception->getMessage()],
+            ]);
+            $order->update(['status' => 'cancelled']);
 
-                return redirect()->away($stripeSession['url']);
-            } catch (RuntimeException $exception) {
-                $paymentRecord->update([
-                    'payment_status' => 'failed',
-                    'callback_data' => ['error' => $exception->getMessage()],
-                ]);
-                $order->update(['status' => 'cancelled']);
-
-                return back()
-                    ->withInput()
-                    ->with('failed', $exception->getMessage());
-            }
+            return back()
+                ->withInput()
+                ->with('failed', $exception->getMessage());
         }
-
-        $factory = $this->resolveFactory($validated['payment_type']);
-        $payment = $factory->createPayment();
-        $adapter = new ToyyibPayPaymentAdapter($payment);
-
-        $payload = $adapter->createCheckoutPayload((float) $validated['amount'], [
-            'name' => $validated['customer_name'] ?? $request->user()?->name,
-            'email' => $validated['customer_email'] ?? $request->user()?->email,
-            'phone' => $phone,
-            'reference' => 'CHK-' . now()->format('YmdHis'),
-        ]);
 
         $paymentRecord->update([
             'bill_code' => $payload['bill_code'],
+            'callback_data' => $payload['callback_data'],
         ]);
 
         return redirect()
@@ -311,6 +306,7 @@ class PaymentController extends Controller
     private function resolveFactory(string $paymentType): PaymentFactory
     {
         return match ($paymentType) {
+            'Card' => new CardFactory(),
             'FPX' => new FPXFactory(),
             default => throw new InvalidArgumentException('Invalid Payment Type'),
         };

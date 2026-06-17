@@ -2,6 +2,7 @@
 
 namespace App\Adapters;
 
+use App\Payments\Payment as PaymentMethod;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -9,11 +10,17 @@ class StripeCheckoutAdapter
 {
     private string $baseUrl = 'https://api.stripe.com/v1';
 
+    public function __construct(
+        private ?PaymentMethod $paymentMethod = null
+    ) {
+    }
+
     public function createCheckoutSession(
         float $amount,
         int $orderId,
         int $paymentId,
-        ?string $customerEmail = null
+        ?string $customerEmail = null,
+        ?string $paymentSummary = null
     ): array {
         $secretKey = config('services.stripe.secret');
 
@@ -29,7 +36,7 @@ class StripeCheckoutAdapter
                     'price_data' => [
                         'currency' => 'myr',
                         'product_data' => [
-                            'name' => "Shoe order #{$orderId}",
+                            'name' => ($this->paymentMethod?->methodLabel() ?? 'Card Payment') . " - Shoe order #{$orderId}",
                         ],
                         'unit_amount' => (int) round($amount * 100),
                     ],
@@ -41,6 +48,8 @@ class StripeCheckoutAdapter
             'metadata' => [
                 'order_id' => (string) $orderId,
                 'payment_id' => (string) $paymentId,
+                'payment_method' => $this->paymentMethod?->driverCode() ?? 'Card',
+                'payment_summary' => $paymentSummary ?? $this->paymentMethod?->methodLabel() ?? 'Card Payment',
             ],
         ];
 
