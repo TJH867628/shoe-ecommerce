@@ -43,10 +43,19 @@
         <h1 class="text-4xl md:text-5xl font-black tracking-tight mt-2">{{ $shoe->shoe_name }}</h1>
         <p class="text-slate-600 mt-3 max-w-2xl">Manage media, options, SKU creation, and product details from one organized workspace.</p>
     </div>
-    <a href="{{ route('admin.shoes.index') }}" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors">
-        <i class="fas fa-arrow-left"></i>
-        Back to Shoes
-    </a>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('admin.shoes.index') }}" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors">
+            <i class="fas fa-arrow-left"></i>
+            Back to Shoes
+        </a>
+        <form action="{{ route('admin.shoes.clone', $shoe->id) }}" method="POST" onsubmit="return confirm('Clone this shoe?')">
+            @csrf
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors">
+                <i class="fas fa-copy"></i>
+                Clone
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">

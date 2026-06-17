@@ -105,6 +105,7 @@ Route::get('/admin/shoes/{shoeId}', [ShoeController::class, 'adminShow'])->middl
 Route::post('/admin/shoes', [ShoeController::class, 'createShoe'])->middleware(['auth', 'admin'])->name('admin.shoes.store');
 Route::put('/admin/shoes/{shoeId}', [ShoeController::class, 'updateShoe'])->middleware(['auth', 'admin'])->name('admin.shoes.update');
 Route::delete('/admin/shoes/{shoeId}', [ShoeController::class, 'deleteShoe'])->middleware(['auth', 'admin'])->name('admin.shoes.destroy');
+Route::post('/admin/shoes/{shoeId}/clone', [ShoePrototypeController::class, 'clone'])->middleware(['auth', 'admin'])->name('admin.shoes.clone');
 
 Route::post('/admin/shoes/options', [ShoeController::class, 'createShoeOptions'])->middleware(['auth', 'admin'])->name('admin.shoes.options.store');
 Route::put('/admin/shoes/options/{optionId}', [ShoeController::class, 'updateOption'])->middleware(['auth', 'admin'])->name('admin.shoes.options.update');

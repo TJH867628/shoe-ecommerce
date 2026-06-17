@@ -172,6 +172,13 @@
                                         <i class="fas fa-pen-to-square"></i>
                                         Details
                                     </a>
+                                    <form action="{{ route('admin.shoes.clone', $shoe->id) }}" method="POST" onsubmit="return confirm('Clone this shoe?')">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors">
+                                            <i class="fas fa-copy"></i>
+                                            Clone
+                                        </button>
+                                    </form>
                                     <form action="{{ route('admin.shoes.destroy', $shoe->id) }}" method="POST" onsubmit="return confirm('Delete this shoe?')">
                                         @csrf
                                         @method('DELETE')
