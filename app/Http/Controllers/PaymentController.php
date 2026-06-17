@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Adapters\PaymentAdapter;
 use App\Adapters\StripeCheckoutAdapter;
 use App\Factory\CardFactory;
 use App\Factory\FPXFactory;
@@ -77,21 +76,16 @@ class PaymentController extends Controller
         }
 
         $factory = $this->resolveFactory($validated['payment_type']);
-        $payment = $factory->createPayment();
-        $paymentMethod = $payment->driverCode();
 
         $paymentRecord = Payment::create([
             'order_id' => $order->id,
             'payment_amount' => $validated['amount'],
             'payment_status' => 'pending',
-            'payment_method' => $paymentMethod,
+            'payment_method' => $validated['payment_type'],
         ]);
 
-        $adapter = new PaymentAdapter($payment);
-
         try {
-            $payload = $adapter->createBill([
-                'amount' => (float) $validated['amount'],
+            $payload = $factory->processPayment((float) $validated['amount'], [
                 'order_id' => $order->id,
                 'payment_id' => $paymentRecord->id,
                 'customer_email' => $validated['customer_email'] ?? $request->user()?->email,

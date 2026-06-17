@@ -2,6 +2,7 @@
 //Abstract Creator
 namespace App\Factory;
 
+use App\Adapters\PaymentAdapter;
 use App\Payments\Payment;
 
 abstract class PaymentFactory
@@ -12,6 +13,8 @@ abstract class PaymentFactory
     {
         $payment = $this->createPayment();
 
-        return $payment->pay($amount, $data);
+        return (new PaymentAdapter($payment))->createBill(array_merge($data, [
+            'amount' => $amount,
+        ]));
     }
 }
