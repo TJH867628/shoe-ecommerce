@@ -57,12 +57,12 @@ class PaymentController extends Controller
 
         $phone = $this->normalizeMalaysiaPhoneNumber($validated['customer_phone']);
 
-        $cart = Cart::where('user_id', auth()->id())
+        $cart = Cart::where('user_id', Auth::id())
             ->with('items.variation.shoe')
             ->first();
 
         $order = Order::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'total_amount' => $validated['amount'],
             'status' => 'pending',
         ]);
@@ -148,7 +148,7 @@ class PaymentController extends Controller
         $isValidPayment = $payment
             && $payment->bill_code === $sessionId
             && (int) data_get($session, 'metadata.order_id') === $payment->order_id
-            && $payment->order->user_id === auth()->id()
+            && $payment->order->user_id === Auth::id()
             && (int) ($session['amount_total'] ?? 0) === (int) round($payment->payment_amount * 100)
             && ($session['payment_status'] ?? null) === 'paid';
 
@@ -180,7 +180,7 @@ class PaymentController extends Controller
         $payment = Payment::with('order')
             ->where('order_id', $orderId)
             ->where('payment_method', 'Card')
-            ->whereHas('order', fn ($query) => $query->where('user_id', auth()->id()))
+            ->whereHas('order', fn ($query) => $query->where('user_id', Auth::id()))
             ->first();
 
         if ($payment && $payment->payment_status !== 'success') {

@@ -7,11 +7,12 @@ use App\Services\ToyyibPayConfig;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
+use App\Payments\Payment as PaymentMethod;
 
 class ToyyibPayPaymentAdapter
 {
     public function __construct(
-        private ToyyibPayPaymentMethod $paymentMethod
+        private ?PaymentMethod $paymentMethod = null
     ) {
     }
 

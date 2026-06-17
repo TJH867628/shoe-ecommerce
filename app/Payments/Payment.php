@@ -2,9 +2,10 @@
 //Product Interface
 namespace App\Payments;
 
-use App\Contracts\ToyyibPayPaymentMethod;
-
-interface Payment extends ToyyibPayPaymentMethod
+interface Payment
 {
     public function pay(float $amount);
+    public function driverCode(): string;
+    public function methodLabel(): string;
+    public function paymentChannel(): int;
 }
