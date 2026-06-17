@@ -8,13 +8,12 @@ class CardPayment implements Payment
 {
     public function pay(float $amount, array $data = []): array
     {
-        $paymentResult = "Card payment processed successfully for RM " . number_format($amount, 2) . ".";
         $session = (new StripeCheckoutAdapter($this))->createCheckoutSession(
             $amount,
             (int) $data['order_id'],
             (int) $data['payment_id'],
             $data['customer_email'] ?? null,
-            $paymentResult
+            $data['payment_summary'] ?? $this->methodLabel()
         );
 
         return [

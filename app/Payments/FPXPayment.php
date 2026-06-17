@@ -8,10 +8,9 @@ class FPXPayment implements Payment
 {
     public function pay(float $amount, array $data = []): array
     {
-        $paymentResult = "FPX payment processed successfully for RM " . number_format($amount, 2) . ".";
         $customer = array_merge([
             'bill_name' => $this->methodLabel(),
-            'bill_description' => $paymentResult,
+            'bill_description' => $data['payment_summary'] ?? $this->methodLabel(),
         ], $data['customer'] ?? []);
 
         $payload = (new ToyyibPayPaymentAdapter($this))->createCheckoutPayload($amount, $customer);
